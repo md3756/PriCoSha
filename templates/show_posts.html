@@ -15,10 +15,15 @@ Here are posts by {{fname}}:
 	<th>Time</th>
 	<th>Post</th>
 
+<th scope="col">Player</th>
+<th scope="col">Gloobles</th>
+<th scope="col">Za'taak</th>
 {% for line in posts %}
 	<tr>
+    	<th scope="row">TR-7</th>
 		<td>{{line.ts}}</td>
 		<td>{{line.blog_post}}</td>
+
 	</tr>
 {% endfor %}
 </table>

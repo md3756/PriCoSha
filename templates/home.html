@@ -17,13 +17,20 @@
 Here are your posts:
 
 <table>
-	<th>Time</th>
-	<th>Post</th>
+    <th>Item_ID</th>
+	<th>Email_Post</th>
+	<th>Post_Time</th>
+	<th>File_Path</th>
+	<th>Item_Name</th>
 
 {% for line in posts %}
 	<tr>
-		<td>{{line.ts}}</td>
-		<td>{{line.blog_post}}</td>
+		<td>{{line.item_id}}</td>
+		<td>{{line.email_post}}</td>
+		<td>{{line.post_time}}</td>
+		<td>{{line.file_path}}</td>
+		<td>{{line.item_name}}</td>
+
 	</tr>
 {% endfor %}
 </table>
