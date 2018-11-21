@@ -13,16 +13,8 @@ conn = pymysql.connect(host='localhost',
                        cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
-<<<<<<< HEAD
-def hello():
-=======
 def index():
->>>>>>> 88f25750286d33e3c6605c953532c806fd3da6f2
     return render_template('index.html')
-
-@app.route('/home')
-def home():
-    return render_template('home.html')
     
 @app.route('/login')
 def login():
