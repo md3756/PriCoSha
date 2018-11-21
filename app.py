@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, session, url_for, redirect
-import datetime
 import pymysql.cursors
 
 app = Flask(__name__)
