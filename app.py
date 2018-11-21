@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, session, url_for, redirect
+import datetime
 import pymysql.cursors
 
 app = Flask(__name__)
@@ -7,7 +8,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password = '',
+                       port=3308,
+                       password = 'root',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -86,13 +88,11 @@ def registerAuth():
 def home():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM contentitem ORDER BY item_id DESC'
+    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), INTERVAL 24 HOUR)  ORDER BY item_id DESC'
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
     return render_template('home.html', username=user, posts=data)
-
-
 
 @app.route('/logout')
 def logout():
