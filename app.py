@@ -94,8 +94,11 @@ def home():
     query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), INTERVAL 24 HOUR) AND is_pub = True ORDER BY item_id DESC'
     cursor.execute(query)
     data = cursor.fetchall()
+    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY item_id DESC'
+    cursor.execute(query, (user))
+    data1 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data)
+    return render_template('home.html', username=user, posts=data, posts_user = data1)
 
 @app.route('/logout')
 def logout():
