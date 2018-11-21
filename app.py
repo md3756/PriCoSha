@@ -87,7 +87,7 @@ def registerAuth():
 def home():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), INTERVAL 24 HOUR)  ORDER BY item_id DESC'
+    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(post_time, INTERVAL 24 HOUR)  ORDER BY item_id DESC'
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
