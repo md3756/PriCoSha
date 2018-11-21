@@ -3,6 +3,7 @@
 </head>
 <body>
 <form action="/post" method="POST">
+	<center>
 	<h1>Welcome {{fname}} {{lname}}</h1>
 	<input type="text" name = "blog" placeholder="post" required/> </br>
 	<input type="submit" value = Post />
@@ -17,11 +18,11 @@
 Here are your posts:
 
 <table>
-    <th>Item_ID</th>
-	<th>Email_Post</th>
-	<th>Post_Time</th>
-	<th>File_Path</th>
-	<th>Item_Name</th>
+    <th>Item ID</th>
+	<th>Email Post</th>
+	<th>Post Time</th>
+	<th>File Path</th>
+	<th>Item Name</th>
 
 {% for line in posts %}
 	<tr>
@@ -35,10 +36,9 @@ Here are your posts:
 {% endfor %}
 </table>
 
-<a href="/select_blogger">Select a blogger</a>
 <br>
 <a href="/logout">Logout</a>
-
+</center>
 </body>
 
 
