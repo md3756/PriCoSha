@@ -15,7 +15,12 @@ conn = pymysql.connect(host='localhost',
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    cursor = conn.cursor()
+    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), INTERVAL 24 HOUR) AND is_pub = True ORDER BY item_id DESC'
+    cursor.execute(query)
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('index.html', posts=data)
 
 @app.route('/login')
 def login():
@@ -91,7 +96,7 @@ def home():
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data)
+    return render_template('home.html', username=user)
 
 @app.route('/logout')
 def logout():

@@ -4,14 +4,41 @@
 <head>
 
 </head>
-
+<center>
 <body>
     <h1>Welcome to PriCoSha</h1>
 	<a href="/login">Login</a>
 
 	<a href="/register">Register</a>
 
+  <style type="text/css">
+  	table, th, td{
+  		border: 1px solid black;
+  	}
+  </style>
+
+<br>
+Here are the most recent posts in the last 24 hours:
+
+<table>
+  <th>Item ID</th>
+  <th>Email Post</th>
+  <th>Post Time</th>
+  <th>File Path</th>
+  <th>Item Name</th>
+
+{% for line in posts %}
+  <tr>
+  	<td>{{line.item_id}}</td>
+  	<td>{{line.email_post}}</td>
+  	<td>{{line.post_time}}</td>
+  	<td>{{line.file_path}}</td>
+  	<td>{{line.item_name}}</td>
+
+  </tr>
+{% endfor %}
+</table>
 
 </body>
-
+</center>
 </html>
