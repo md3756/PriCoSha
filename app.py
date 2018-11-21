@@ -7,8 +7,7 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       port=3308,
-                       password = 'root',
+                       password = '',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -96,7 +95,7 @@ def home():
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user)
+    return render_template('home.html', username=user, posts=data)
 
 @app.route('/logout')
 def logout():
