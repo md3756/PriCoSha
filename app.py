@@ -14,9 +14,6 @@ conn = pymysql.connect(host='localhost',
 
 @app.route('/')
 def index():
-    #cursor = conn.cursor
-    #query = 'SELECT * FROM contentItem'
-    #cursor.execute(query)
     return render_template('index.html')
 
 @app.route('/login')
@@ -27,25 +24,18 @@ def login():
 def register():
     return render_template('register.html')
 
-@app.route('/select_blogger')
-def select_blogger():
-    return render_template('select_blogger.html')
-
-@app.route('/show_posts')
-def show_posts():
-    return render_template('show_posts.html')
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     #grabs information from the forms
     username = request.form['email']
-    password = request.form['email_password']
+    password = request.form['password']
 
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM person WHERE email = %s and email_password = %s'
+    query = 'SELECT * FROM person WHERE email = %s and password = %s'
     cursor.execute(query, (username, password))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -67,7 +57,7 @@ def loginAuth():
 def registerAuth():
     #grabs information from the forms
     username = request.form['email']
-    password = request.form['email_password']
+    password = request.form['password']
     fname = request.form['fname']
     lname = request.form['lname']
 
@@ -96,8 +86,8 @@ def registerAuth():
 def home():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM contentItem WHERE email = %s ORDER BY ts DESC'
-    cursor.execute(query, (user))
+    query = 'SELECT * FROM contentitem ORDER BY item_id DESC'
+    cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
     return render_template('home.html', username=user, posts=data)
