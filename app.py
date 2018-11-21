@@ -13,9 +13,17 @@ conn = pymysql.connect(host='localhost',
                        cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
+<<<<<<< HEAD
 def hello():
+=======
+def index():
+>>>>>>> 88f25750286d33e3c6605c953532c806fd3da6f2
     return render_template('index.html')
 
+@app.route('/home')
+def home():
+    return render_template('home.html')
+    
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -24,6 +32,13 @@ def login():
 def register():
     return render_template('register.html')
 
+@app.route('/select_blogger')
+def select_blogger():
+    return render_template('select_blogger.html')
+
+@app.route('/show_posts')
+def show_posts():
+    return render_template('show_posts.html')
 
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
