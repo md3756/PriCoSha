@@ -3,19 +3,22 @@ import pymysql.cursors
 
 app = Flask(__name__)
 
-
+#WAMP server
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password = '',
-                       db='flaskdemo',
+                       db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
 def index():
+    #cursor = conn.cursor
+    #query = 'SELECT * FROM contentItem'
+    #cursor.execute(query)
     return render_template('index.html')
-    
+
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -36,13 +39,13 @@ def show_posts():
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     #grabs information from the forms
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form['email']
+    password = request.form['email_password']
 
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM person WHERE username = %s and password = %s'
+    query = 'SELECT * FROM person WHERE email = %s and email_password = %s'
     cursor.execute(query, (username, password))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -52,24 +55,26 @@ def loginAuth():
     if(data):
         #creates a session for the the user
         #session is a built in
-        session['username'] = username
+        session['email'] = username
         return redirect(url_for('home'))
     else:
         #returns an error message to the html page
-        error = 'Invalid login or username'
+        error = 'Invalid login or email'
         return render_template('login.html', error=error)
 
 #Authenticates the register
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
     #grabs information from the forms
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form['email']
+    password = request.form['email_password']
+    fname = request.form['fname']
+    lname = request.form['lname']
 
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM person WHERE username = %s'
+    query = 'SELECT * FROM person WHERE email = %s'
     cursor.execute(query, (username))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -80,8 +85,8 @@ def registerAuth():
         error = "This user already exists"
         return render_template('register.html', error = error)
     else:
-        ins = 'INSERT INTO person VALUES(%s, %s)'
-        cursor.execute(ins, (username, password))
+        ins = 'INSERT INTO person VALUES(%s, %s, %s, %s)'
+        cursor.execute(ins, (username, password, fname, lname))
         conn.commit()
         cursor.close()
         return render_template('index.html')
@@ -89,9 +94,9 @@ def registerAuth():
 
 @app.route('/home')
 def home():
-    user = session['username']
+    user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC'
+    query = 'SELECT * FROM contentItem WHERE email = %s ORDER BY ts DESC'
     cursor.execute(query, (user))
     data = cursor.fetchall()
     cursor.close()
@@ -101,7 +106,7 @@ def home():
 
 @app.route('/logout')
 def logout():
-    session.pop('username')
+    session.pop('email')
     return redirect('/')
 
 app.secret_key = 'some key that you will never guess'
