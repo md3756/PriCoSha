@@ -4,7 +4,7 @@
 <body>
 <form action="/post" method="POST">
 	<center>
-	<h1>Welcome {{username}} </h1>
+	<h1>Welcome {{name.fname}} {{name.lname}}</h1>
 	<input type="text" name = "blog" placeholder="post" required/> </br>
 	<input type="submit" value = Post />
 </form>
@@ -19,7 +19,7 @@
 Here are the most recent public posts in the last 24 hours:
 
 <table>
-  <th>Item ID</th>
+    <th>Item ID</th>
 	<th>Email Post</th>
 	<th>Post Time</th>
 	<th>File Path</th>
@@ -36,8 +36,6 @@ Here are the most recent public posts in the last 24 hours:
 	</tr>
 {% endfor %}
 </table>
-
-<br>
 
 <br>
 Here are your posts:
@@ -63,6 +61,7 @@ Here are your posts:
 
 <br>
 
+<br>
 <a href="/logout">Logout</a>
 </center>
 </body>

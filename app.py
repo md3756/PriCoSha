@@ -97,8 +97,11 @@ def home():
     query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY item_id DESC'
     cursor.execute(query, (user))
     data1 = cursor.fetchall()
+    query = 'SELECT fname, lname FROM person WHERE email = %s'
+    cursor.execute(query, (user))
+    name = cursor.fetchone()
     cursor.close()
-    return render_template('home.html', username=user, posts=data, posts_user = data1)
+    return render_template('home.html', username=user, posts=data, posts_user = data1, name=name)
 
 @app.route('/logout')
 def logout():
