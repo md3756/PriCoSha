@@ -103,6 +103,21 @@ def home():
     cursor.close()
     return render_template('home.html', username=user, posts=data, posts_user = data1, name=name)
 
+@app.route('/post', methods=['GET','POST'])
+def post():
+    post = request.form['post_name']
+    is_pub = int(request.form['public'])
+    user = session['email']
+    cursor = conn.cursor();
+    if(is_pub == 1):
+        ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, TRUE)'
+    else:
+        ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, FALSE)'
+    cursor.execute(ins, (user, post))
+    conn.commit()
+    cursor.close()
+    return redirect(url_for('home'))
+
 @app.route('/logout')
 def logout():
     session.pop('email')

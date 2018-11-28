@@ -6,7 +6,7 @@
         table {
             border-collapse: collapse;
         }
-    
+
     td, th {
         border: 1px solid #999;
         padding: 0.5rem;
@@ -18,7 +18,9 @@
 <form action="/post" method="POST">
 	<center>
 	<h1>Welcome {{name.fname}} {{name.lname}}!</h1>
-	<input type="text" name = "blog" placeholder="post" required/> </br>
+	<input type="text" name = "post_name" placeholder="Post Name" required/>
+  Public: Yes<input type="checkbox" name = "public" value = "1" />
+  No<input type="checkbox" name = "public" value = "0" />
 	<input type="submit" value = Post />
 </form>
 
