@@ -1,51 +1,93 @@
 <html>
 <head>
-    <style>
-        body {background-color: powderblue;}
-        h1   {color: blue;}
-        table {
-            border-collapse: collapse;
-        }
-    
-    td, th {
-        border: 1px solid #999;
-        padding: 0.5rem;
-        text-align: left;
-    }
-    </style>
+	<style type="text/css">
+		table, th, td{
+			border: 1px solid black;
+		}
+		table {
+				border-collapse: collapse;
+		}
+
+		td, th {
+		border: 1px solid #999;
+		padding: 0.5rem;
+		text-align: left;
+		}
+		body {
+			background-color: powderblue;
+		}
+	</style>
 </head>
 <body>
+<center>
 
-<style type="text/css">
-	table, th, td{
-		border: 1px solid black;
-	}
-</style>
 
-Here are posts by {{fname}}:
-
+Here are the post details:
+<br>
+Basic Info:
 <table>
-	<th>Time</th>
-	<th>Post</th>
-
-{% for line in posts %}
+	<table>
+	  <th>Item ID</th>
+		<th>Email Post</th>
+		<th>Post Time</th>
+		<th>File Path</th>
+		<th>Item Name</th>
+<!--	<th>Post</th>
+-->
+{% for line in post %}
 	<tr>
-		<td>{{line.ts}}</td>
-		<td>{{line.blog_post}}</td>
+		<td>{{line.item_id}}</td>
+		<td>{{line.email_post}}</td>
+		<td>{{line.post_time}}</td>
+		<td>{{line.file_path}}</td>
+		<td>{{line.item_name}}</td>
+	</tr>
+	{% endfor %}
+</table>
+<br>
+Comments:
+
+<br>
+<textarea name="comment" cols="40" rows="5"></textarea>
+<br>
+<input type="submit" value = "Add a comment" />
+<br>
+<br>
+Friends Tagged in Picture:
+<table>
+	<table>
+	  <th>Name</th>
+		<th>Email Tagged</th>
+{% for line in tags %}
+	<tr>
+		<td>{{line.fname}} {{line.lname}}</td>
+		<td>{{line.email}}</td>
 	</tr>
 {% endfor %}
 </table>
 
 <br>
+<form action="/tag" method="POST">
+	<input type="text" name="friendTag" placeholder="Tagged" /> </br>
+	<input type="submit" value = "Add a friendTag" />
+</form>
 <br>
-<a href="/select_blogger">Select another blogger</a>
+
+Geographic Tag:
+<br>
+<input type="text" name="geoTag" placeholder="location" /> </br>
+<input type="submit" value = "Add a geoTag" />
+<br>
+
+
 <br>
 <br>
-<a href="/home">Post a message</a>
+<a href="/home">Return to home</a>
+<br>
 <br>
 <br>
 <a href="/logout">Logout</a>
-
+</center>
 </body>
 
 

@@ -37,7 +37,7 @@
 Here are the most recent public posts in the last 24 hours:
 
 <table>
-    <th>Item ID</th>
+  <th>Item ID</th>
 	<th>Email Post</th>
 	<th>Post Time</th>
 	<th>File Path</th>
@@ -45,7 +45,9 @@ Here are the most recent public posts in the last 24 hours:
 
 {% for line in posts %}
 	<tr>
-		<td>{{line.item_id}}</td>
+		<form action="/show_posts" method="POST">
+		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
+  	</form>
 		<td>{{line.email_post}}</td>
 		<td>{{line.post_time}}</td>
 		<td>{{line.file_path}}</td>
@@ -67,7 +69,9 @@ Here are your posts:
 
 {% for line in posts_user %}
 	<tr>
-		<td>{{line.item_id}}</td>
+		<form action="/show_posts" method="POST">
+		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
+  	</form>
 		<td>{{line.email_post}}</td>
 		<td>{{line.post_time}}</td>
 		<td>{{line.file_path}}</td>
@@ -78,6 +82,22 @@ Here are your posts:
 </table>
 
 <br>
+
+Tags Awaiting Approval:
+<table>
+  <th>Item ID</th>
+	<th>Tagger</th>
+
+{% for line in tags %}
+	<tr>
+		<td>{{line.item_id}}</td>
+		<td>{{line.email_tagger}}</td>
+		<form action="/accept_tag" method="POST">
+		<input type="submit" name ="post" value = "Accept" value = "1" />
+  	</form>
+	</tr>
+{% endfor %}
+</table>
 
 <br>
 <a href="/logout">Logout</a>

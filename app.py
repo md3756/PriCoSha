@@ -30,6 +30,7 @@ def register():
     return render_template('register.html')
 
 
+
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
@@ -100,8 +101,11 @@ def home():
     query = 'SELECT fname, lname FROM person WHERE email = %s'
     cursor.execute(query, (user))
     name = cursor.fetchone()
+    query = 'SELECT * FROM tag WHERE email_tagged = %s AND status = "FALSE" ORDER BY tagtime DESC'
+    cursor.execute(query, (user))
+    data2 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data, posts_user = data1, name=name)
+    return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
 
 @app.route('/post', methods=['GET','POST'])
 def post():
@@ -117,6 +121,50 @@ def post():
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
+
+@app.route('/show_posts', methods=['GET','POST'])
+def show_posts():
+    item = request.form['post']
+    session['item_id'] = item
+    cursor = conn.cursor();
+    ins = 'SELECT * FROM contentitem WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data = cursor.fetchall()
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
+    cursor.execute(ins, (item))
+    data1 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_posts.html', post = data, tags = data1)
+
+@app.route('/tag', methods=['GET','POST'])
+def tag():
+    tagger = session['email']
+    tagged = request.form['friendTag']
+    item = session['item_id']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT * FROM tag WHERE email_tagged = %s AND item_id = %s'
+    cursor.execute(query, (tagged, item))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    error = None
+    if(data):
+        #If the previous query returns data, then tag exists
+        error = "This tag already exists"
+        return redirect(url_for('home'))
+    else:
+        if (tagger == tagged):
+            ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
+        else:
+            ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
+        cursor.execute(ins, (tagged, tagger, item))
+        conn.commit()
+        cursor.close()
+        return redirect(url_for('home'))
+
+
 
 @app.route('/logout')
 def logout():
