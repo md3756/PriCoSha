@@ -1,0 +1,100 @@
+<html>
+<head>
+  <style type="text/css">
+    body {
+          background-color: powderblue;
+          margin: 0 auto;
+    }
+    table, td, th{
+      border: 1px solid black;
+    }
+
+    table {
+            border-collapse: collapse;
+    }
+    td, th {
+        padding: 0.5rem;
+        text-align: left;
+    }
+    header {
+      background-color: #466995;
+      border-bottom: 1px solid #466995;
+      width: 100%;
+    }
+    li{
+      color: white;
+      display: inline-block;
+      width: 200px;
+    }
+    h1{
+      font-family: Georgia;
+      color: blue;
+    }
+    </style>
+</head>
+<body>
+<center>
+
+<nav>
+	 <header>
+	    <ul>
+	      <a href ="/home"><li>HOME</li></a>
+				<a href ="/friendgroup"><li>FRIENDS</li></a>
+				<a href ="/home"><li>SHARED/GEO POSTS</li></a>
+	    </ul>
+	  </header>
+</nav>
+
+FriendGroup(s) Owned:
+<br>
+<table>
+  <th>Group Name</th>
+	<th>Description</th>
+
+{% for line in group %}
+	<tr>
+		<td>{{line.fg_name}}</td>
+		<td>{{line.description}}</td>
+
+	</tr>
+{% endfor %}
+</table>
+<br>
+
+FriendGroup(s) Belonging To:
+<br>
+<table>
+  <th>Group Name</th>
+	<th>Description</th>
+
+{% for line in group1 %}
+	<tr>
+		<td>{{line.fg_name}}</td>
+		<td>{{line.description}}</td>
+	</tr>
+{% endfor %}
+</table>
+<br>
+
+Create FriendGroup:
+<form action="/create_friendgroup" method="POST">
+<input type="text" name="description" placeholder="Description" />
+<input type="text" name="name" placeholder="Friend Group Name" />
+<input type="submit" value="Create Group">
+</form>
+<br>
+Add Member to FriendGroup:
+<form action="/add_member" method="POST">
+<input type="text" name="member" placeholder="Member email" />
+<input type="text" name="name" placeholder="Friend Group Name" />
+<input type="submit" value="Add Member">
+</form>
+
+
+
+<a href="/logout">Logout</a>
+
+</body>
+
+
+</html>
