@@ -148,7 +148,6 @@ def tag():
     cursor.execute(query, (tagged, item))
     #stores the results in a variable
     data = cursor.fetchone()
-    #use fetchall() if you are expecting more than 1 data row
     error = None
     if(data):
         #If the previous query returns data, then tag exists
@@ -237,13 +236,21 @@ def add_member():
         cursor.close()
     return redirect(url_for('friendgroup'))
 
-@app.route('/_tag', methods=['GET','POST'])
-def _tag():
-    tag = request.form['tag']
-    if(tag == 'Accept'):
-        return
+@app.route('/tag_ad', methods=['GET','POST'])
+def tag_ad():
+    item = request.form['item']
+    tag = int(request.form['tag'])
+    user = session['email']
+    cursor = conn.cursor();
+    if(tag == 1) :
+        ins = 'UPDATE tag SET status = "TRUE" WHERE item_id = %s AND email_tagged = %s'
+        cursor.execute(ins, (item, user))
     else:
-        return
+        ins = 'DELETE FROM tag WHERE item_id = %s AND email_tagged = %s AND status = "FALSE"'
+        cursor.execute(ins, (item, user))
+    conn.commit()
+    cursor.close()
+    return redirect(url_for('home'))
 
 @app.route('/logout')
 def logout():

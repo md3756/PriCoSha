@@ -114,10 +114,12 @@ Tags Awaiting Approval:
 
 {% for line in tags %}
 	<tr>
-		<td>{{line.item_id}}</td>
+    <form action="/tag_ad" method="POST">
+		<td><input type = 'hidden' name ="item" value ="{{line.item_id}}">{{line.item_id}}</input></td>
 		<td>{{line.email_tagger}}</td>
-		<form action="/_tag" method="POST">
-		<td><input type="submit" name ="tag" value = "Accept" /><input type="submit" name ="tag" value = "Decline" /></td>
+		<td>Accept:<input type="radio" name = "tag" value = "1" />
+    Decline:<input type="radio" name = "tag" value = "0" />
+    <input type="submit" value = Submit /></td>
   	</form>
 	</tr>
 {% endfor %}
