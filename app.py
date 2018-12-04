@@ -215,15 +215,21 @@ def add_member():
     data = cursor.fetchone()
     #use fetchall() if you are expecting more than 1 data row
     query = 'SELECT * FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
-    cursor.execute(query, (user, name, member))
+    cursor.execute(query, (user, name))
     #stores the results in a variable
     data1 = cursor.fetchone()
+    query = 'SELECT * FROM person WHERE email = %s'
+    cursor.execute(query, (member))
+    #stores the results in a variable
+    data2 = cursor.fetchone()
     error = None
     if(data):
         #If the previous query returns data, then tag exists
         error = "This member is already in the group"
     if not (data1):
         error = "This group does not exist"
+    if not (data2):
+        error = "This member does not exist"
     else:
         ins = 'INSERT INTO belong VALUES(%s, %s, %s)'
         cursor.execute(ins, (member, user, name))
