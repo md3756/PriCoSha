@@ -44,66 +44,32 @@
 		  </header>
 	</nav>
 
-<h1>Here are the post details:</h1>
+<h1>Here are the details of {{name}}:</h1>
 <br>
-Basic Info:
-<table>
-	<table>
-	  <th>Item ID</th>
-		<th>Email Post</th>
-		<th>Post Time</th>
-		<th>File Path</th>
-		<th>Item Name</th>
-<!--	<th>Post</th>
--->
-{% for line in post %}
-	<tr>
-		<td>{{line.item_id}}</td>
-		<td>{{line.email_post}}</td>
-		<td>{{line.post_time}}</td>
-		<td>{{line.file_path}}</td>
-		<td>{{line.item_name}}</td>
-	</tr>
-	{% endfor %}
-</table>
-<br>
-Comments and Ratings:
-
-<br>
-<textarea name="comment" cols="40" rows="5" placeholder="(Limited to 140 characters)"></textarea>
-<br>
-<input type="submit" value = "Add a comment" />
+Description: {{info.description}}
 <br>
 <br>
-
-Friends Tagged in Picture:
+Members:
 <table>
 	<table>
 	  <th>Name</th>
-		<th>Email Tagged</th>
-{% for line in tags %}
+		<th>Email</th>
+{% for line in members %}
 	<tr>
 		<td>{{line.fname}} {{line.lname}}</td>
 		<td>{{line.email}}</td>
 	</tr>
-{% endfor %}
+	{% endfor %}
 </table>
-
 <br>
-<form action="/tag" method="POST">
-	<input type="text" name="friendTag" placeholder="Tagged" /> </br>
-	<input type="submit" value = "Add a friendTag" />
+
+
+Add Member:
+<form action="/add_member" method="POST">
+<input type="text" name="member" placeholder="Member email" />
+<input type="submit" value="Add Member">
 </form>
-<br>
 
-Geographic Tag:
-<br>
-<input type="text" name="geoTag" placeholder="location" /> </br>
-<input type="submit" value = "Add a geoTag" />
-<br>
-
-
-<br>
 <br>
 <br>
 <br>

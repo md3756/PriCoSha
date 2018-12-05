@@ -53,7 +53,9 @@ FriendGroup(s) Owned:
 
 {% for line in group %}
 	<tr>
-		<td>{{line.fg_name}}</td>
+    <form action="/show_group" method="POST">
+    <td><input type="submit" name ="group" value = "{{line.fg_name}}" /></td>
+    </form>
 		<td>{{line.description}}</td>
 
 	</tr>
@@ -83,12 +85,6 @@ Create FriendGroup:
 <input type="submit" value="Create Group">
 </form>
 <br>
-Add Member to FriendGroup:
-<form action="/add_member" method="POST">
-<input type="text" name="member" placeholder="Member email" />
-<input type="text" name="name" placeholder="Friend Group Name" />
-<input type="submit" value="Add Member">
-</form>
 
 
 

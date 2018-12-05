@@ -202,11 +202,26 @@ def create_friendgroup():
         cursor.close()
     return redirect(url_for('friendgroup'))
 
+@app.route('/show_group', methods=['GET','POST'])
+def show_group():
+    friendgroup = request.form['group']
+    session['friendgroup'] = friendgroup
+    user = session['email']
+    cursor = conn.cursor();
+    ins = 'SELECT description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(ins, (user, friendgroup))
+    data = cursor.fetchone()
+    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(ins, (user, friendgroup))
+    data1 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_group.html', name = friendgroup, info = data, members = data1)
+
 @app.route('/add_member', methods=['GET','POST'])
 def add_member():
     user = session['email']
     member = request.form['member']
-    name = request.form['name']
+    name = session['friendgroup']
     cursor = conn.cursor();
     query = 'SELECT * FROM belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
     cursor.execute(query, (user, name, member))
@@ -225,9 +240,9 @@ def add_member():
     if(data):
         #If the previous query returns data, then tag exists
         error = "This member is already in the group"
-    if not (data1):
+    elif not (data1):
         error = "This group does not exist"
-    if not (data2):
+    elif not (data2):
         error = "This member does not exist"
     else:
         ins = 'INSERT INTO belong VALUES(%s, %s, %s)'
