@@ -1,36 +1,31 @@
 <html>
 <head>
 	<style type="text/css">
-    body {
-					background-color: powderblue;
-					margin: 0 auto;
-		}
-    table, td, th{
-      border: 1px solid black;
-    }
+	body {
+		background-color: powderblue;
+		margin: 0 auto;
+	}
+	h1   {color: blue;}
+	table {
+			border-collapse: collapse;
+	}
 
-    table {
-            border-collapse: collapse;
-    }
-    td, th {
-        padding: 0.5rem;
-        text-align: left;
-    }
-		header {
-  		background-color: #466995;
-  		border-bottom: 1px solid #466995;
-  		width: 100%;
-		}
-		li{
-			color: white;
-			display: inline-block;
-			width: 200px;
-		}
-    h1{
-  		font-family: Georgia;
-      color: blue;
-  	}
-    </style>
+	td, th {
+		border: 1px solid #999;
+		padding: 0.5rem;
+		text-align: left;
+}
+	header {
+		background-color: #466995;
+		border-bottom: 1px solid #466995;
+		width: 100%;
+	}
+	li{
+		color: white;
+		display: inline-block;
+		width: 200px;
+	}
+	</style>
 </head>
 <body>
 <center>
@@ -67,6 +62,9 @@ Basic Info:
 	{% endfor %}
 </table>
 <br>
+
+
+<br>
 Comments and Ratings:
 
 <br>
@@ -96,6 +94,14 @@ Friends Tagged in Picture:
 </form>
 <br>
 
+<br>
+<form action="/tag_group" method="POST">
+	<input type="text" name="FriendGroupTag" placeholder="TaggedGroup" /> </br>
+	<input type="text" name="FriendGroupOwner" placeholder="Owner" /> </br>
+	<input type="submit" value = "Add a friendGroupTag" />
+</form>
+<br>
+
 Geographic Tag:
 <br>
 <input type="text" name="geoTag" placeholder="location" /> </br>
@@ -104,6 +110,8 @@ Geographic Tag:
 
 
 <br>
+<br>
+<a href="/home">Return to home</a>
 <br>
 <br>
 <br>

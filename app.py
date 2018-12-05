@@ -162,6 +162,47 @@ def tag():
         cursor.close()
     return redirect(url_for('home'))
 
+@app.route('/tag_group', methods=['GET','POST'])
+def tag_group():
+    tagger = session['email']
+    taggedGroup = request.form['FriendGroupTag']
+    owner = request.form['FriendGroupOwner']
+    item = session['item_id']
+    #cursor used to send queries
+    cursor = conn.cursor()
+    #executes query
+    query = 'SELECT * FROM belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
+    cursor.execute(query, (owner, taggedGroup, tagger))
+    data = cursor.fetchone()
+    query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(query, (owner, taggedGroup))
+    data1 = cursor.fetchall()
+    query = 'SELECT email_tagged FROM tag WHERE item_id = %s'
+    cursor.execute(query, (item))
+    data2 = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    error = None
+    if not (data):
+        error = "This post is not visible to this group"
+    else:
+        exists = False
+        for line in data1:
+            for line1 in data2:
+                if line['email']== line1['email_tagged']:
+                    error = "This person is already tagged or pending a tag"
+                    exists = True
+            if (tagger == line['email'] and not exists):
+                ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
+                cursor.execute(ins, (line['email'], tagger, item))
+                conn.commit()
+            elif (not exists):
+                ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
+                cursor.execute(ins, (line['email'], tagger, item))
+                conn.commit()
+            exists = False
+        cursor.close()
+    return redirect(url_for('home'))
+
 @app.route('/friendgroup', methods=['GET','POST'])
 def friendgroup():
     user = session['email']
