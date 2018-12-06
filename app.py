@@ -7,7 +7,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password = '',
+                       port=3308,
+                       password = 'root',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -126,6 +127,17 @@ def post():
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
+
+@app.route('/shared', methods=['GET,POST'])
+def shared():
+    user = session['email']
+    cursor = conn.cursor();
+    query = 'SELECT * FROM contentitem NATURAL JOIN share NATURAL JOIN belong WHERE item_id NOT IN (SELECT item_id FROM contentitem WHERE email_post = %s )'
+    cursor.execute(query, (user))
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template('shared_posts.html', posts=data)
+
 
 @app.route('/show_posts', methods=['GET','POST'])
 def show_posts():
@@ -322,7 +334,7 @@ def create_friendgroup():
         ins = 'INSERT INTO friendgroup VALUES(%s, %s, %s)'
         cursor.execute(ins, (user, name, description))
         conn.commit()
-        ins = 'INSERT INTO belong VALUES(%s, %s, %s "TRUE")'
+        ins = 'INSERT INTO belong VALUES(%s, %s, %s, "TRUE")'
         cursor.execute(ins, (user, user, name))
         conn.commit()
         cursor.close()

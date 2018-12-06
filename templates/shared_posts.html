@@ -1,0 +1,80 @@
+<html>
+<head>
+  <style type="text/css">
+    body {
+					background-color: powderblue;
+					margin: 0 auto;
+		}
+    table, td, th{
+      border: 1px solid black;
+    }
+
+    table {
+            border-collapse: collapse;
+    }
+    td, th {
+        padding: 0.5rem;
+        text-align: left;
+    }
+		header {
+  		background-color: #466995;
+  		border-bottom: 1px solid #466995;
+  		width: 100%;
+		}
+		li{
+			color: white;
+			display: inline-block;
+			width: 200px;
+		}
+    h1{
+  		font-family: Georgia;
+      color: blue;
+  	}
+    </style>
+</head>
+<body>
+<center>
+
+<nav>
+	 <header>
+	    <ul>
+	      <a href ="/home"><li>HOME</li></a>
+				<a href ="/friendgroup"><li>FRIENDS</li></a>
+				<a href ="/shared"><li>SHARED/GEO POSTS</li></a>
+	    </ul>
+	  </header>
+</nav>
+
+<center>
+<h1>Here's what your friends have shared!</h1>
+
+<table>
+  <th>Item ID</th>
+	<th>Email Post</th>
+	<th>Post Time</th>
+	<th>File Path</th>
+	<th>Item Name</th>
+
+{% for line in posts %}
+	<tr>
+		<form action="/show_visibleposts" method="POST">
+		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
+    <td><input type="hidden" name ="poster" value = "{{line.email_post}}" />{{line.email_post}}</td>
+    <td>{{line.post_time}}</td>
+    <td>{{line.file_path}}</td>
+    <td>{{line.item_name}}</td>
+    </form>
+
+	</tr>
+{% endfor %}
+</table>
+
+<br>
+
+<br>
+<a href="/logout">Logout</a>
+</center>
+</body>
+
+
+</html>
