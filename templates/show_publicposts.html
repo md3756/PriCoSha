@@ -1,0 +1,115 @@
+<html>
+<head>
+	<style type="text/css">
+	body {
+		background-color: powderblue;
+		margin: 0 auto;
+	}
+	h1   {color: blue;}
+	table {
+			border-collapse: collapse;
+	}
+
+	td, th {
+		border: 1px solid #999;
+		padding: 0.5rem;
+		text-align: left;
+}
+	header {
+		background-color: #466995;
+		border-bottom: 1px solid #466995;
+		width: 100%;
+	}
+	li{
+		color: white;
+		display: inline-block;
+		width: 200px;
+	}
+	</style>
+</head>
+<body>
+<center>
+	<nav>
+		 <header>
+		    <ul>
+		      <a href ="/home"><li>HOME</li></a>
+					<a href ="/friendgroup"><li>FRIENDS</li></a>
+					<a href ="/home"><li>SHARED/GEO POSTS</li></a>
+		    </ul>
+		  </header>
+	</nav>
+
+<h1>Here are the post details:</h1>
+<br>
+Basic Info:
+<table>
+	<table>
+	  <th>Item ID</th>
+		<th>Email Post</th>
+		<th>Post Time</th>
+		<th>File Path</th>
+		<th>Item Name</th>
+
+
+{% for line in post %}
+	<tr>
+		<td>{{line.item_id}}</td>
+		<td>{{line.email_post}}</td>
+		<td>{{line.post_time}}</td>
+		<td>{{line.file_path}}</td>
+		<td>{{line.item_name}}</td>
+	</tr>
+	{% endfor %}
+</table>
+<br>
+Comments and Ratings:
+
+<br>
+<textarea name="comment" cols="40" rows="5" placeholder="(Limited to 140 characters)"></textarea>
+<br>
+<input type="submit" value = "Add a comment" />
+<br>
+<br>
+
+Friends Tagged in Picture:
+<table>
+	<table>
+	  <th>Name</th>
+		<th>Email Tagged</th>
+{% for line in tags %}
+	<tr>
+		<td>{{line.fname}} {{line.lname}}</td>
+		<td>{{line.email}}</td>
+	</tr>
+{% endfor %}
+</table>
+
+<br>
+<form action="/tag" method="POST">
+	<input type="text" name="friendTag" placeholder="Tagged" /> </br>
+	<input type="submit" value = "Add a friendTag" />
+</form>
+<br>
+
+
+<br>
+<form action="/tag_group" method="POST">
+	{% for line in groups %}
+	{{line.fg_name}} with owner({{line.owner_email}}):<input type = "radio" name = "FriendGroupTag" value="{{line.fg_name}}"><input type = "hidden" name = "FriendGroupOwner" value = "{{line.owner_email}}"></input></input>
+	{% endfor %}
+	<input type="submit" value = "Add a friendGroupTag" />
+</form>
+<br>
+
+<br>
+<br>
+<a href="/home">Return to home</a>
+<br>
+<br>
+<br>
+<a href="/logout">Logout</a>
+</center>
+</body>
+
+
+</html>

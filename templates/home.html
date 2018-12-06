@@ -68,18 +68,18 @@ Here are the public posts:
 	<th>File Path</th>
 	<th>Item Name</th>
 
-{% for line in posts %}
-	<tr>
-		<form action="/show_posts" method="POST">
-		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
-  	</form>
-		<td>{{line.email_post}}</td>
-		<td>{{line.post_time}}</td>
-		<td>{{line.file_path}}</td>
-		<td>{{line.item_name}}</td>
+  {% for line in posts %}
+  	<tr>
+  		<form action="/show_publicposts" method="POST">
+  		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
+  		<td><input type="hidden" name ="poster" value = "{{line.email_post}}" />{{line.email_post}}</td>
+  		<td>{{line.post_time}}</td>
+  		<td>{{line.file_path}}</td>
+  		<td>{{line.item_name}}</td>
+      </form>
+  	</tr>
+  {% endfor %}
 
-	</tr>
-{% endfor %}
 </table>
 
 <br>

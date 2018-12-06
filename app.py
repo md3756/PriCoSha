@@ -141,6 +141,46 @@ def show_posts():
     cursor.close()
     return render_template('show_posts.html', post = data, tags = data1)
 
+@app.route('/show_visibleposts', methods=['GET','POST'])
+def show_visibleposts():
+    item = request.form['post']
+    poster = request.form['poster']
+    session['item_id'] = item
+    session['poster'] = poster
+    user = session['email']
+    cursor = conn.cursor();
+    ins = 'SELECT * FROM contentitem WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data = cursor.fetchall()
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
+    cursor.execute(ins, (item))
+    data1 = cursor.fetchall()
+    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong AS b WHERE email = %s AND status = "TRUE" AND (fg_name, owner_email) in (SELECT fg_name, owner_email FROM belong WHERE email = %s AND fg_name = b.fg_name AND owner_email = b.owner_email AND status = "TRUE")'
+    cursor.execute(ins, (poster, user))
+    data2 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_visibleposts.html', post = data, tags = data1, groups = data2)
+
+@app.route('/show_publicposts', methods=['GET','POST'])
+def show_publicposts():
+    item = request.form['post']
+    poster = request.form['poster']
+    session['item_id'] = item
+    session['poster'] = poster
+    user = session['email']
+    cursor = conn.cursor();
+    ins = 'SELECT * FROM contentitem WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data = cursor.fetchall()
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
+    cursor.execute(ins, (item))
+    data1 = cursor.fetchall()
+    ins = 'SELECT fg_name, owner_email FROM friendgroup'
+    cursor.execute(ins)
+    data2 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_publicposts.html', post = data, tags = data1, groups = data2)
+
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
     item = session['item_id']
@@ -285,7 +325,7 @@ def create_friendgroup():
         ins = 'INSERT INTO friendgroup VALUES(%s, %s, %s)'
         cursor.execute(ins, (user, name, description))
         conn.commit()
-        ins = 'INSERT INTO belong VALUES(%s, %s, %s)'
+        ins = 'INSERT INTO belong VALUES(%s, %s, %s "TRUE")'
         cursor.execute(ins, (user, user, name))
         conn.commit()
         cursor.close()
