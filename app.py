@@ -134,7 +134,7 @@ def shared():
     cursor = conn.cursor();
     query = 'SELECT DISTINCT contentitem.item_id, contentitem.email_post, ' \
             'contentitem.post_time, contentitem.file_path, contentitem.item_name ' \
-            'FROM contentitem NATURAL JOIN share NATURAL JOIN belong WHERE item_id AND is_pub <> TRUE ' \
+            'FROM contentitem NATURAL JOIN share NATURAL JOIN belong WHERE is_pub <> TRUE AND item_id '  \
             'NOT IN (SELECT item_id FROM contentitem WHERE email_post = %s )'
     cursor.execute(query, (user))
     data = cursor.fetchall()
