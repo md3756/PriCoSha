@@ -213,10 +213,10 @@ def friendgroup():
     ins = 'SELECT friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
-    ins = 'SELECT person.fname, person.lname FROM belong JOIN person USING (email) WHERE owner_email = %s GROUP BY fg_name'
+    ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
-    return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
+    return render_template('friendgroup.html', group = data,  members = data2)
 
 @app.route('/create_friendgroup', methods=['GET','POST'])
 def create_friendgroup():
@@ -252,15 +252,16 @@ def show_group():
     ins = 'SELECT description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (user, friendgroup))
     data = cursor.fetchone()
-    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
+    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(ins, (user, friendgroup))
     data1 = cursor.fetchall()
     cursor.close()
     return render_template('show_group.html', name = friendgroup, info = data, members = data1)
 
-@app.route('/add_member', methods=['GET','POST'])
-def add_member():
+@app.route('/invite_member', methods=['GET','POST'])
+def invite_member():
     user = session['email']
+    session['owner'] = user
     member = request.form['member']
     name = session['friendgroup']
     cursor = conn.cursor();
@@ -286,7 +287,7 @@ def add_member():
     elif not (data2):
         error = "This member does not exist"
     else:
-        ins = 'INSERT INTO belong VALUES(%s, %s, %s)'
+        ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
         cursor.execute(ins, (member, user, name))
         conn.commit()
         cursor.close()
@@ -304,6 +305,24 @@ def tag_ad():
     else:
         ins = 'DELETE FROM tag WHERE item_id = %s AND email_tagged = %s AND status = "FALSE"'
         cursor.execute(ins, (item, user))
+    conn.commit()
+    cursor.close()
+    return redirect(url_for('home'))
+
+@app.route('/member_ad', methods=['GET','POST'])
+def member_ad():
+    #submitting needs work
+    user = session['email']
+    name = session['friendgroup']
+    owner = session['owner']
+    tag = int(request.form['tag'])
+    cursor = conn.cursor();
+    if(tag == 1) :
+        ins = 'UPDATE belong SET status = "TRUE" WHERE email = %s AND owner_email = %s AND fg_name = %s'
+        cursor.execute(ins, (user, owner, name))
+    else:
+        ins = 'DELETE FROM belong WHERE email = %s AND owner_email = %s AND fg_name = % AND status = "FALSE"'
+        cursor.execute(ins, (user, owner, name))
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))

@@ -8,7 +8,6 @@
     table, td, th{
       border: 1px solid black;
     }
-
     table {
             border-collapse: collapse;
     }
@@ -36,29 +35,29 @@
 <center>
 
 <nav>
-	 <header>
-	    <ul>
-	      <a href ="/home"><li>HOME</li></a>
-				<a href ="/friendgroup"><li>FRIENDS</li></a>
-				<a href ="/home"><li>SHARED/GEO POSTS</li></a>
-	    </ul>
-	  </header>
+   <header>
+      <ul>
+        <a href ="/home"><li>HOME</li></a>
+        <a href ="/friendgroup"><li>FRIENDS</li></a>
+        <a href ="/home"><li>SHARED/GEO POSTS</li></a>
+      </ul>
+    </header>
 </nav>
 
 FriendGroup(s) Owned:
 <br>
 <table>
   <th>Group Name</th>
-	<th>Description</th>
+  <th>Description</th>
 
 {% for line in group %}
-	<tr>
+  <tr>
     <form action="/show_group" method="POST">
     <td><input type="submit" name ="group" value = "{{line.fg_name}}" /></td>
     </form>
-		<td>{{line.description}}</td>
+    <td>{{line.description}}</td>
 
-	</tr>
+  </tr>
 {% endfor %}
 </table>
 <br>
@@ -67,15 +66,36 @@ FriendGroup(s) Belonging To:
 <br>
 <table>
   <th>Group Name</th>
-	<th>Description</th>
+  <th>Description</th>
 
 {% for line in group1 %}
-	<tr>
-		<td>{{line.fg_name}}</td>
-		<td>{{line.description}}</td>
-	</tr>
+  <tr>
+    <td>{{line.fg_name}}</td>
+    <td>{{line.description}}</td>
+  </tr>
 {% endfor %}
 </table>
+<br>
+
+Group Invite Pending:
+<table>
+  <th>Owner</th>
+  <th>Group Name</th>
+  <th>Accept or Decline Tag</th>
+
+{% for line in members %}
+  <tr>
+    <form action="/member_ad" method="POST">
+    <td><input type = 'hidden' name ="item" value ="{{line.owner_email}}">{{line.owner_email}}</input></td>
+    <td>{{line.fg_name}}</td>
+    <td>Accept:<input type="radio" name = "tag" value = "1" />
+    Decline:<input type="radio" name = "tag" value = "0" />
+    <input type="submit" value = Submit /></td>
+    </form>
+  </tr>
+{% endfor %}
+</table>
+
 <br>
 
 Create FriendGroup:
