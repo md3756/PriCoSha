@@ -69,7 +69,28 @@
 </table>
 
 <br>
+Here are the top rated posts!
+<table>
+  <th>Item ID</th>
+	<th>Email Post</th>
+	<th>Post Time</th>
+	<th>File Path</th>
+	<th>Item Name</th>
 
+{% for line in posts %}
+	<tr>
+		<form action="/show_visibleposts" method="POST">
+		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
+    <td><input type="hidden" name ="poster" value = "{{line.email_post}}" />{{line.email_post}}</td>
+    <td>{{line.post_time}}</td>
+    <td>{{line.file_path}}</td>
+    <td>{{line.item_name}}</td>
+
+    </form>
+	</tr>
+{% endfor %}
+
+</table>
 <br>
 <a href="/logout">Logout</a>
 </center>

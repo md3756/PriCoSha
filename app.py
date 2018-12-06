@@ -7,7 +7,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password = '',
+                       port=3308,
+                       password = 'root',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -137,8 +138,13 @@ def shared():
             'NOT IN (SELECT item_id FROM contentitem WHERE email_post = %s )'
     cursor.execute(query, (user))
     data = cursor.fetchall()
+    query = 'SELECT contentitem.item_id, email_post, post_time, file_path, ' \
+            'item_name, COUNT(emoji) FROM rate NATURAL JOIN contentitem ' \
+            'GROUP BY item_id HAVING COUNT(emoji) > 5'
+    cursor.execute(query)
+    data2 = cursor.fetchall()
     cursor.close()
-    return render_template('shared_posts.html', posts=data)
+    return render_template('shared_posts.html', posts=data, emoji1=data2)
 
 
 @app.route('/show_posts', methods=['GET','POST'])
@@ -313,7 +319,7 @@ def friendgroup():
     ins = 'SELECT friendgroup.fg_name, friendgroup.description FROM friendgroup WHERE owner_email = %s'
     cursor.execute(ins, (user))
     data = cursor.fetchall()
-    ins = 'SELECT friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
+    ins = 'SELECT DISTINCT friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
     ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name'
