@@ -216,7 +216,7 @@ def friendgroup():
     ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
-    return render_template('friendgroup.html', group = data,  members = data2)
+    return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
 
 @app.route('/create_friendgroup', methods=['GET','POST'])
 def create_friendgroup():
@@ -252,6 +252,7 @@ def show_group():
     ins = 'SELECT description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (user, friendgroup))
     data = cursor.fetchone()
+    #double check query!
     ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(ins, (user, friendgroup))
     data1 = cursor.fetchall()
@@ -311,7 +312,7 @@ def tag_ad():
 
 @app.route('/member_ad', methods=['GET','POST'])
 def member_ad():
-    #submitting needs work
+    #submitting needs work!
     user = session['email']
     name = session['friendgroup']
     owner = session['owner']
@@ -337,3 +338,4 @@ app.secret_key = 'some key that you will never guess'
 
 if __name__ == "__main__":
     app.run('127.0.0.1', 5000, debug=True)
+
