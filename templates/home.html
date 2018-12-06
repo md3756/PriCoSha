@@ -45,10 +45,12 @@
 	  </header>
 </nav>
 
+<center>
+<h1>Welcome {{name.fname}} {{name.lname}}!</h1>
+
 <form action="/post" method="POST">
-	<center>
-	<h1>Welcome {{name.fname}} {{name.lname}}!</h1>
 	<input type="text" name = "post_name" placeholder="Post Name" required/>
+  File Path: <input type="text" name="file_path" placeholder="File Path" />
   Public: Yes<input type="radio" name = "public" value = "1" />
   No<input type="radio" name = "public" value = "0" checked/>
 	<input type="submit" value = Post />
@@ -57,7 +59,7 @@
 
 
 <br>
-Here are the most recent public posts in the last 24 hours:
+Here are the public posts:
 
 <table>
   <th>Item ID</th>

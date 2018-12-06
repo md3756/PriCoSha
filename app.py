@@ -92,10 +92,10 @@ def registerAuth():
 def home():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), INTERVAL 24 HOUR) AND is_pub = True ORDER BY item_id DESC'
+    query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY post_time DESC'
     cursor.execute(query)
     data = cursor.fetchall()
-    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY item_id DESC'
+    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY post_time DESC'
     cursor.execute(query, (user))
     data1 = cursor.fetchall()
     query = 'SELECT fname, lname FROM person WHERE email = %s'
@@ -111,13 +111,18 @@ def home():
 def post():
     post = request.form['post_name']
     is_pub = int(request.form['public'])
+    file_path = request.form['file_path']
     user = session['email']
     cursor = conn.cursor();
-    if(is_pub == 1):
-        ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, TRUE)'
+    if(is_pub == 1 and file_path):
+        ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, TRUE)'
+        cursor.execute(ins, (user, file_path, post))
+    elif(file_path):
+        ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, FALSE)'
+        cursor.execute(ins, (user, file_path, post))
     else:
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, FALSE)'
-    cursor.execute(ins, (user, post))
+        cursor.execute(ins, (user, post))
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
@@ -135,6 +140,49 @@ def show_posts():
     data1 = cursor.fetchall()
     cursor.close()
     return render_template('show_posts.html', post = data, tags = data1)
+
+@app.route('/edit_post', methods=['GET','POST'])
+def edit_post():
+    item = session['item_id']
+    item_name = request.form['item_name']
+    file_path = request.form['file_path']
+    cursor = conn.cursor();
+    if (item_name):
+        ins = 'UPDATE contentitem SET item_name = %s WHERE item_id = %s'
+        cursor.execute(ins, (item_name, item))
+        conn.commit()
+    if (file_path):
+        ins = 'UPDATE contentitem SET file_path = %s WHERE item_id = %s'
+        cursor.execute(ins, (file_path, item))
+        conn.commit()
+    if(item_name or file_path):
+        ins = 'UPDATE contentitem SET post_time = NOW() WHERE item_id = %s'
+        cursor.execute(ins, (item))
+        conn.commit()
+    cursor.close()
+    return redirect(url_for('home'))
+
+@app.route('/share_post', methods=['GET','POST'])
+def share_post():
+    item = session['item_id']
+    group = request.form['group']
+    owner = request.form['owner']
+    cursor = conn.cursor();
+    query = 'SELECT * FROM share WHERE item_id = %s AND owner_email = %s AND fg_name = %s'
+    cursor.execute(query, (item, owner, group))
+    #stores the results in a variable
+    data = cursor.fetchone()
+    #use fetchall() if you are expecting more than 1 data row
+    error = None
+    if(data):
+        #If the previous query returns data, then user exists
+        error = "This post was already shared to this group"
+    else:
+        ins = 'INSERT INTO share VALUES(%s, %s, %s)'
+        cursor.execute(ins, (owner, group, item))
+        conn.commit()
+        cursor.close()
+    return redirect(url_for('home'))
 
 @app.route('/tag', methods=['GET','POST'])
 def tag():
@@ -338,4 +386,3 @@ app.secret_key = 'some key that you will never guess'
 
 if __name__ == "__main__":
     app.run('127.0.0.1', 5000, debug=True)
-
