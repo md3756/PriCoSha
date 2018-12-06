@@ -93,16 +93,6 @@ Friends Tagged in Picture:
 
 
 <br>
-<form action="/tag_group" method="POST">
-	{% for line in groups %}
-	{{line.fg_name}} with owner({{line.owner_email}}):<input type = "radio" name = "FriendGroupTag" value="{{line.fg_name}}"><input type = "hidden" name = "FriendGroupOwner" value = "{{line.owner_email}}"></input></input>
-	{% endfor %}
-	<input type="submit" value = "Add a friendGroupTag" />
-</form>
-<br>
-
-<br>
-<br>
 <a href="/home">Return to home</a>
 <br>
 <br>

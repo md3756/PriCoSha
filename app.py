@@ -175,11 +175,8 @@ def show_publicposts():
     ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
-    ins = 'SELECT fg_name, owner_email FROM friendgroup'
-    cursor.execute(ins)
-    data2 = cursor.fetchall()
     cursor.close()
-    return render_template('show_publicposts.html', post = data, tags = data1, groups = data2)
+    return render_template('show_publicposts.html', post = data, tags = data1)
 
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
