@@ -7,8 +7,7 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       port=3308,
-                       password = 'root',
+                       password = '',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -146,6 +145,7 @@ def shared():
 def show_posts():
     item = request.form['post']
     session['item_id'] = item
+    user = session['email']
     cursor = conn.cursor();
     ins = 'SELECT * FROM contentitem WHERE item_id = %s'
     cursor.execute(ins, (item))
@@ -153,8 +153,11 @@ def show_posts():
     ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
+    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong WHERE email = %s'
+    cursor.execute(ins, (user))
+    data2 = cursor.fetchall()
     cursor.close()
-    return render_template('show_posts.html', post = data, tags = data1)
+    return render_template('show_posts.html', post = data, tags = data1, groups = data2)
 
 @app.route('/show_visibleposts', methods=['GET','POST'])
 def show_visibleposts():
