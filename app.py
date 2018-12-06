@@ -128,11 +128,14 @@ def post():
     cursor.close()
     return redirect(url_for('home'))
 
-@app.route('/shared', methods=['GET,POST'])
+@app.route('/shared', methods=['GET','POST'])
 def shared():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM contentitem NATURAL JOIN share NATURAL JOIN belong WHERE item_id NOT IN (SELECT item_id FROM contentitem WHERE email_post = %s )'
+    query = 'SELECT DISTINCT contentitem.item_id, contentitem.email_post, ' \
+            'contentitem.post_time, contentitem.file_path, contentitem.item_name ' \
+            'FROM contentitem NATURAL JOIN share NATURAL JOIN belong WHERE item_id AND is_pub <> TRUE ' \
+            'NOT IN (SELECT item_id FROM contentitem WHERE email_post = %s )'
     cursor.execute(query, (user))
     data = cursor.fetchall()
     cursor.close()
