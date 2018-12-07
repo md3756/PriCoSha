@@ -104,17 +104,21 @@ def home():
 def homeError(error):
     user = session['email']
     cursor = conn.cursor();
+    #Query for displaying info on public posts
     query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY ' \
         'post_time DESC'
     cursor.execute(query)
     data = cursor.fetchall()
+    #Query to display user's posts
     query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY ' \
         'post_time DESC'
     cursor.execute(query, (user))
     data1 = cursor.fetchall()
+    #Query for Welcoming user to page
     query = 'SELECT fname, lname FROM person WHERE email = %s'
     cursor.execute(query, (user))
     name = cursor.fetchone()
+    #Query for displaying tags awaiting approval
     query = 'SELECT item_id, email_tagger FROM tag WHERE email_tagged = %s ' \
         'AND status = "FALSE" ORDER BY tagtime DESC'
     cursor.execute(query, (user))
@@ -138,15 +142,19 @@ def post():
     user = session['email']
     cursor = conn.cursor();
     if(is_pub == 1 and file_path):
+        #Query for inserting public post w/ file path into database
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, TRUE)'
         cursor.execute(ins, (user, file_path, post))
     elif(is_pub == 0 and file_path):
+        #Query for inserting private post w/ file path into database
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, FALSE)'
         cursor.execute(ins, (user, file_path, post))
     elif(is_pub == 1):
+        #Query for inserting public post
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, TRUE)'
         cursor.execute(ins, (user, post))
     else:
+        #Query for inserting private post
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, FALSE)'
         cursor.execute(ins, (user, post))
     conn.commit()
@@ -162,13 +170,16 @@ def comment():
     item = session['item_id']
     comment = request.form['the_comment']
     cursor = conn.cursor()
+    #Query for displaying user comments
     ins = 'SELECT * FROM comments WHERE item_id = %s AND email = %s'
     cursor.execute(ins, (item, email))
     data1 = cursor.fetchall()
     error = None
     if (data1):
+        #User has already commented on post
         error = "You already commented on this post :)!"
     else:
+        #Query to insert user's comment into database
         ins = 'INSERT INTO comments VALUES(%s, %s, NOW(), %s)'
         cursor.execute(ins, (email, item, comment))
         conn.commit()
@@ -192,10 +203,13 @@ def rate():
         error = "You already rated this post! :)"
     else:
         if (emoji == 1):
+            #User rates this post with heart eyed emoji
             ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "😍")'
         if (emoji == 2):
+            #User rates this post with laughing emoji
             ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "😂")'
         if (emoji == 3):
+            #Query rates this post with thumbs up emoji
             ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "👍")'
         cursor.execute(ins, (email, item))
         conn.commit()
@@ -203,7 +217,8 @@ def rate():
     return homeError(error)
 
 #Shows the posts visible to user since the posts were shared by their friends
-#Also shows top rated posts of user's friends and the user which posts that have more than 5 ratings
+#Also shows top rated posts of user's friends
+#And the user which posts that have more than 5 ratings
 #The user can link to the top rated post and leave a rating
 @app.route('/shared', methods=['GET','POST'])
 def shared():
