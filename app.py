@@ -380,7 +380,7 @@ def friendgroup():
     ins = 'SELECT DISTINCT friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
-    ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name'
+    ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name,owner_email'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
     return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
