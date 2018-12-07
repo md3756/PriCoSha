@@ -69,6 +69,9 @@ PriCoSha is a system of privately sharing content items among groups of people. 
 
 ### **Member Contributions**
 Mithila: Adding comments, Rating posts, CSS features
-Daisy: Group Invite, Add friend, error displaying
+
+Daisy: Group Invite, Add friend, Error displaying
+
 Hannah: Editing post, Tagging a Group, Manage tags
-Lyanne: Show public content, top rated posts, showing shared content
+
+Lyanne: Show public content, top rated posts, Showing shared content
