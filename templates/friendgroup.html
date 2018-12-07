@@ -68,14 +68,17 @@ FriendGroup(s) Belonging To:
   <th>Group Name</th>
   <th>Description</th>
 
-{% for line in group1 %}
-  <tr>
-    <td>{{line.fg_name}}</td>
-    <td>{{line.description}}</td>
-  </tr>
-{% endfor %}
-</table>
-<br>
+  {% for line in group1 %}
+  	<tr>
+      <form action="/show_belonggroup" method="POST">
+      <td><input type="submit" name ="group" value = "{{line.fg_name}}" /></td>
+      <input type="hidden" name ="owner" value = "{{line.owner_email}}" />
+      </form>
+  		<td>{{line.description}}</td>
+  	</tr>
+  {% endfor %}
+  </table>
+  <br>
 
 Group Invite Pending:
 <table>

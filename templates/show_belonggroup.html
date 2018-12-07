@@ -1,0 +1,78 @@
+<html>
+<head>
+	<style type="text/css">
+    body {
+					background-color: powderblue;
+					margin: 0 auto;
+		}
+    table, td, th{
+      border: 1px solid black;
+    }
+
+    table {
+            border-collapse: collapse;
+    }
+    td, th {
+        padding: 0.5rem;
+        text-align: left;
+    }
+		header {
+  		background-color: #466995;
+  		border-bottom: 1px solid #466995;
+  		width: 100%;
+		}
+		li{
+			color: white;
+			display: inline-block;
+			width: 200px;
+		}
+    h1{
+  		font-family: Georgia;
+      color: blue;
+  	}
+    </style>
+</head>
+<body>
+<center>
+	<nav>
+		 <header>
+		    <ul>
+		      <a href ="/home"><li>HOME</li></a>
+					<a href ="/friendgroup"><li>FRIENDS</li></a>
+					<a href ="/home"><li>SHARED/GEO POSTS</li></a>
+		    </ul>
+		  </header>
+	</nav>
+
+<h1>Here are the details of {{name}}:</h1>
+<br>
+Owner: {{info.owner_email}}
+<br>
+Description: {{info.description}}
+<br>
+<br>
+Members:
+<table>
+	<table>
+	  <th>Name</th>
+		<th>Email</th>
+{% for line in members %}
+	<tr>
+		<td>{{line.fname}} {{line.lname}}</td>
+		<td>{{line.email}}</td>
+	</tr>
+	{% endfor %}
+</table>
+<br>
+
+
+
+<br>
+<br>
+<br>
+<a href="/logout">Logout</a>
+</center>
+</body>
+
+
+</html>

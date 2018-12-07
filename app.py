@@ -5,21 +5,21 @@ app = Flask(__name__)
 
 #WAMP server
 #Configure MySQL
-#conn = pymysql.connect(host='localhost',
-#                       user='root',
-#                       password = '',
-#                       db='pricosha',
-#                       charset='utf8mb4',
-#                       cursorclass=pymysql.cursors.DictCursor)
-
-#MAMP server
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password = 'root',
-                       port = 8889,
+                       password = '',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
+
+#MAMP server
+#conn = pymysql.connect(host='localhost',
+#                       user='root',
+#                       password = 'root',
+#                       port = 8889,
+#                       db='pricosha',
+#                       charset='utf8mb4',
+#                       cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
 def index():
@@ -433,6 +433,21 @@ def show_group():
     data1 = cursor.fetchall()
     cursor.close()
     return render_template('show_group.html', name = friendgroup, info = data, members = data1)
+
+@app.route('/show_belonggroup', methods=['GET','POST'])
+def show_belonggroup():
+    friendgroup = request.form['group']
+    session['friendgroup'] = friendgroup
+    owner = request.form['owner']
+    cursor = conn.cursor();
+    ins = 'SELECT description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(ins, (owner, friendgroup))
+    data = cursor.fetchone()
+    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(ins, (owner, friendgroup))
+    data1 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_belonggroup.html', name = friendgroup, info = data, members = data1)
 
 @app.route('/tag_ad', methods=['GET','POST'])
 def tag_ad():
