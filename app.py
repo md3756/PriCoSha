@@ -16,7 +16,7 @@ app = Flask(__name__)
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password = 'root',
-                       port = 8889,
+                       port = 3308,
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -116,10 +116,12 @@ def home():
     cursor.execute(query, (user))
     data2 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
+    return render_template('home.html', username=user, posts=data,
+            posts_user = data1, name=name, tags = data2)
 
 
-
+#Allows user to post text either publicly or privately to friendgroup
+#Inserts user's post into database
 @app.route('/post', methods=['GET','POST'])
 def post():
     post = request.form['post_name']
@@ -142,6 +144,7 @@ def post():
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
+
 
 @app.route('/shared', methods=['GET','POST'])
 def shared():
@@ -222,7 +225,8 @@ def comment():
     cursor.execute(query, (user))
     data2 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2, error = error)
+    return render_template('home.html', username=user, posts=data,
+            posts_user = data1, name=name, tags = data2, error = error)
 
 
 @app.route('/rate', methods=['GET', 'POST'])
@@ -236,6 +240,7 @@ def rate():
     data1 = cursor.fetchall()
     error = None
     if (data1):
+        #User already rated post, can't rate more than once
         error = "You already rated this post! :)"
     else:
         if (emoji == 1):
@@ -419,7 +424,7 @@ def tag_group():
                 if line['email']== line1['email_tagged']:
                     error = "This person is already tagged or pending a tag"
                     exists = True
-        
+
             if (tagger == line['email'] and not exists):
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
                 cursor.execute(ins, (line['email'], tagger, item))
@@ -450,7 +455,8 @@ def friendgroup():
             'status = "FALSE" GROUP BY fg_name,owner_email'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
-    return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
+    return render_template('friendgroup.html', group = data,
+            group1 = data1, members = data2)
 
 @app.route('/create_friendgroup', methods=['GET','POST'])
 def create_friendgroup():
@@ -458,7 +464,8 @@ def create_friendgroup():
     description = request.form['description']
     name = request.form['name']
     cursor = conn.cursor();
-    query = 'SELECT * FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    query = 'SELECT * FROM friendgroup WHERE owner_email = %s ' \
+            'AND fg_name = %s'
     cursor.execute(query, (user, name))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -493,7 +500,8 @@ def show_group():
     cursor.execute(ins, (user, friendgroup))
     data1 = cursor.fetchall()
     cursor.close()
-    return render_template('show_group.html', name = friendgroup, info = data, members = data1)
+    return render_template('show_group.html', name = friendgroup,
+            info = data, members = data1)
 
 @app.route('/show_belonggroup', methods=['GET','POST'])
 def show_belonggroup():
@@ -506,11 +514,13 @@ def show_belonggroup():
     cursor.execute(ins, (owner, friendgroup))
     data = cursor.fetchone()
     ins = 'SELECT fname, lname, person.email FROM belong ' \
-            'NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
+            'NATURAL JOIN person WHERE owner_email = %s ' \
+            'AND fg_name = %s AND status = "TRUE"'
     cursor.execute(ins, (owner, friendgroup))
     data1 = cursor.fetchall()
     cursor.close()
-    return render_template('show_belonggroup.html', name = friendgroup, info = data, members = data1)
+    return render_template('show_belonggroup.html',
+            name = friendgroup, info = data, members = data1)
 
 @app.route('/tag_ad', methods=['GET','POST'])
 def tag_ad():
