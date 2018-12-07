@@ -7,7 +7,8 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password = '',
+                       password = 'root',
+                       port = 8889,
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -158,13 +159,14 @@ def show_posts():
     ins = 'SELECT DISTINCT fg_name, owner_email FROM belong WHERE email = %s'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
-    cursor.close()
-    cursor = conn.cursor()
     ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
     cursor.execute(ins, (item))
     data3 = cursor.fetchall()
+    ins = 'SELECT email, emoji FROM rate WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data4 = cursor.fetchall()
     cursor.close()
-    return render_template('show_posts.html', post = data, tags = data1, groups = data2, comments = data3)
+    return render_template('show_posts.html', post = data, tags = data1, groups = data2, comments = data3, ratings = data4)
 
 @app.route('/comment', methods=['GET', 'POST'])
 def comment():
@@ -172,10 +174,41 @@ def comment():
     item = session['item_id']
     comment = request.form['the_comment']
     cursor = conn.cursor()
-    ins = 'INSERT INTO comments VALUES(%s, %s, NOW(), %s)'
-    cursor.execute(ins, (email, item, comment))
-    conn.commit()
-    cursor.close()
+    ins = 'SELECT * FROM comments WHERE item_id = %s AND email = %s'
+    cursor.execute(ins, (item, email))
+    data1 = cursor.fetchall()
+    error = None
+    if (data1):
+        error = "You already commented on this post :)!"
+    else:
+        ins = 'INSERT INTO comments VALUES(%s, %s, NOW(), %s)'
+        cursor.execute(ins, (email, item, comment))
+        conn.commit()
+        cursor.close()
+    return redirect(url_for('home'))
+
+@app.route('/rate', methods=['GET', 'POST'])
+def rate():
+    email = session['email']
+    item = session['item_id']
+    emoji = int(request.form['emoji'])
+    cursor = conn.cursor()
+    ins = 'SELECT * FROM rate WHERE item_id = %s AND email = %s'
+    cursor.execute(ins, (item, email))
+    data1 = cursor.fetchall()
+    error = None
+    if (data1):
+        error = "You already rated this post! :)"
+    else:
+        if (emoji == 1):
+            ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "😍")'
+        if (emoji == 2):
+            ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "😂")'
+        if (emoji == 3):
+            ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "👍")'
+        cursor.execute(ins, (email, item))
+        conn.commit()
+        cursor.close()
     return redirect(url_for('home'))
 
 @app.route('/show_visibleposts', methods=['GET','POST'])
@@ -195,8 +228,14 @@ def show_visibleposts():
     ins = 'SELECT DISTINCT fg_name, owner_email FROM belong AS b WHERE email = %s AND status = "TRUE" AND (fg_name, owner_email) in (SELECT fg_name, owner_email FROM belong WHERE email = %s AND fg_name = b.fg_name AND owner_email = b.owner_email AND status = "TRUE")'
     cursor.execute(ins, (poster, user))
     data2 = cursor.fetchall()
+    ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data3 = cursor.fetchall()
+    ins = 'SELECT email, emoji FROM rate WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data4 = cursor.fetchall()
     cursor.close()
-    return render_template('show_visibleposts.html', post = data, tags = data1, groups = data2)
+    return render_template('show_visibleposts.html', post = data, tags = data1, groups = data2, comments = data3, ratings = data4)
 
 @app.route('/show_publicposts', methods=['GET','POST'])
 def show_publicposts():
@@ -212,8 +251,14 @@ def show_publicposts():
     ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
+    ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data2 = cursor.fetchall()
+    ins = 'SELECT email, emoji FROM rate WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data3 = cursor.fetchall()
     cursor.close()
-    return render_template('show_publicposts.html', post = data, tags = data1)
+    return render_template('show_publicposts.html', post = data, tags = data1, comments = data2, ratings = data3)
 
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():

@@ -71,11 +71,13 @@ Comment:
 </form>
 <br>
 
-Rate:
-😍<input type="radio" value="😍" />
-😂<input type = "radio" value="😂" />
-👍<input type="radio" value="👍" />
-<input type="submit" value=rate />
+<form action="/rate" method = "POST">
+    Rate:
+    😍<input type="radio" name="emoji" value="1" />
+    😂<input type = "radio" name="emoji" value="2" />
+    👍<input type="radio" name="emoji" value="3" />
+    <input type="submit" value=rate />
+</form>
 
 <br>
 Comments:
@@ -92,6 +94,22 @@ Comments:
         {% endfor %}
     </table>
 <br>
+    
+Ratings:
+<table>
+    <table>
+        <th>Email</th>
+        <th>Rating</th>
+        
+        {% for line in ratings %}
+        <tr>
+            <td>{{line.email}}</td>
+            <td>{{line.emoji}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <br>
 
 Friends Tagged in Picture:
 <table>
