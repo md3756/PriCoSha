@@ -65,7 +65,7 @@ PriCoSha is a system of privately sharing content items among groups of people. 
 
 ##### Register
 
-    Users can register themselves with an unique email; otherwise, an error message will appear. The form requires the user to input an appropriate email in the email textbox, a password as well as their first name and last name (register.html).
+  Users can register themselves with an unique email; otherwise, an error message will appear. The form requires the user to input an appropriate email in the email textbox, a password as well as their first name and last name (register.html).
 
 ### **Member Contributions**
 Mithila: Adding comments, Rating posts, CSS features
