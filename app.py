@@ -451,81 +451,106 @@ def tag():
     item = session['item_id']
     cursor = conn.cursor()
     
-    #Get all data for post that is tagged
+    #Get all data for person-tagged's tag on the post with item_id
     query = 'SELECT * FROM tag WHERE email_tagged = %s AND item_id = %s'
     cursor.execute(query, (tagged, item))
     data = cursor.fetchone()
 
-
+    #!
     query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
             'contentitem WHERE item_id = %s AND email = %s AND belong.status = "TRUE"'
     cursor.execute(query, (item, tagged))
     data1 = cursor.fetchone()
+
+    #Get all data for post with item_id that is public
     query = 'SELECT * FROM contentitem WHERE item_id = %s AND is_pub = TRUE'
     cursor.execute(query, (item))
     data2 = cursor.fetchone()
+
+    #Get all data for existing users
     query = 'SELECT * FROM person WHERE email = %s'
     cursor.execute(query, (tagged))
     data3 = cursor.fetchall()
     error = None
+
     if not (data3):
+        #Error: The person tagged does not exist
         error = "This person that you are trying to tag does not exist"
+    
     elif(data):
-        #If the previous query returns data, then tag exists
+        #Error: email_tagged is already tagged on the post
         error = "This tag already exists"
+    
     else:
-        #checks if the post is public or visible to tagged person
+        #Checks if the post is public or visible to the person tagged!
         if(not data2 and not data1):
-                error = "This post is not visible to person tagged"
-        #elif(data1 or data2):
+            #Error: The post is not visible to the person tagged
+            error = "This post is not visible to person tagged"
+        
         else:
             if (user == tagged):
+                #Automatically accept tag if user is tagging themself
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
+            
             else:
+                #Send tag request to person tagged for tag pending
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
+            
             cursor.execute(ins, (tagged, user, item))
             conn.commit()
             cursor.close()
+
     return homeError(error)
 
 
 @app.route('/tag_group', methods=['GET','POST'])
 def tag_group():
-    tagger = session['email']
+    user = session['email']
     taggedGroup = request.form['FriendGroupTag']
     owner = request.form['FriendGroupOwner']
     item = session['item_id']
-    #cursor used to send queries
     cursor = conn.cursor()
-    #executes query
+    
+    #Get all data of post that is shared with friend group!
     query = 'SELECT * FROM share WHERE owner_email = %s ' \
             'AND fg_name = %s AND item_id = %s'
     cursor.execute(query, (owner, taggedGroup, item))
     data = cursor.fetchone()
+
+    #Get email of all members in tagged group
     query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(query, (owner, taggedGroup))
     data1 = cursor.fetchall()
+
+    #Get email of everyone that is tagged in post with item_id
     query = 'SELECT email_tagged FROM tag WHERE item_id = %s'
     cursor.execute(query, (item))
     data2 = cursor.fetchall()
-    #use fetchall() if you are expecting more than 1 data row
+
     error = None
     if not (data):
         error = "This post is not visible to this group or post is public"
     else:
         exists = False
+        #Loop through email of all members in tagged group
         for line in data1:
+            #Loop through email of everyone that is tagged in post with item_id
             for line1 in data2:
-                if line['email']== line1['email_tagged']:
+                if line['email'] == line1['email_tagged']:
+                    #Error: The person is already tagged or have a tag pending for this post
                     error = "This person is already tagged or pending a tag"
                     exists = True
-            if (tagger == line['email'] and not exists):
+             
+            if (user == line['email'] and not exists):
+                #The user in the group is not yet tagged on the post      
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
-                cursor.execute(ins, (line['email'], tagger, item))
+                cursor.execute(ins, (line['email'], user, item))
                 conn.commit()
+
             elif (not exists):
+                #The member of the group is not yet tagged on the post
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
-                cursor.execute(ins, (line['email'], tagger, item))
+                cursor.execute(ins, (line['email'], user, item))
                 conn.commit()
             exists = False
         cursor.close()
