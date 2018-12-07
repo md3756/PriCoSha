@@ -53,6 +53,8 @@
 	<th>Post Time</th>
 	<th>File Path</th>
 	<th>Item Name</th>
+    <th>Group</th>
+    <th>Group Owner</th>
 
 {% for line in posts %}
 	<tr>
@@ -62,6 +64,9 @@
     <td>{{line.post_time}}</td>
     <td>{{line.file_path}}</td>
     <td>{{line.item_name}}</td>
+    <td>{{line.fg_name}}</td>
+    <td>{{line.owner_email}}</td>
+    
     </form>
 	</tr>
 {% endfor %}

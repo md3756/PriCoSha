@@ -16,7 +16,7 @@ app = Flask(__name__)
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password = 'root',
-                       port = 3308,
+                       port = 8889,
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -345,19 +345,17 @@ def tag():
     #stores the results in a variable
     data = cursor.fetchone()
     query1 = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
-            'contentitem WHERE (email = %s AND item_id = %s) OR is_pub = TRUE'
-    cursor.execute(query, (tagger, item))
+            'contentitem WHERE item_id = %s AND (email = %s OR is_pub = TRUE)'
+    cursor.execute(query, (item, tagged))
     #stores the results in a variable
     data1 = cursor.fetchone()
     error = None
     if(data):
         #If the previous query returns data, then tag exists
         error = "This tag already exists"
+    elif(not data1):
+        error = "This post is not public or this post is not visible to tagged"
     else:
-        notag = False
-        for line in data1:
-            if(tagged not in line['email']):
-                notag = True
         if (tagger == tagged):
             ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
         else:
@@ -376,9 +374,9 @@ def tag_group():
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM belong WHERE owner_email = %s ' \
-            'AND fg_name = %s AND email = %s'
-    cursor.execute(query, (owner, taggedGroup, tagger))
+    query = 'SELECT * FROM share WHERE owner_email = %s ' \
+            'AND fg_name = %s AND item_id = %s'
+    cursor.execute(query, (owner, taggedGroup, item))
     data = cursor.fetchone()
     query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(query, (owner, taggedGroup))
@@ -397,6 +395,7 @@ def tag_group():
                 if line['email']== line1['email_tagged']:
                     error = "This person is already tagged or pending a tag"
                     exists = True
+        
             if (tagger == line['email'] and not exists):
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
                 cursor.execute(ins, (line['email'], tagger, item))
@@ -483,7 +482,7 @@ def show_belonggroup():
     cursor.execute(ins, (owner, friendgroup))
     data = cursor.fetchone()
     ins = 'SELECT fname, lname, person.email FROM belong ' \
-            'NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
+            'NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(ins, (owner, friendgroup))
     data1 = cursor.fetchall()
     cursor.close()
