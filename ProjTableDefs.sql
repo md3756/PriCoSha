@@ -1,5 +1,3 @@
-CHANGED
-
 -- Creating tables
 
 CREATE TABLE Person(
