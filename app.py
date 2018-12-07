@@ -21,9 +21,11 @@ conn = pymysql.connect(host='localhost',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
+#Welcome Page for PriCoSha
 @app.route('/')
 def index():
     cursor = conn.cursor()
+    #Query that gets the data for the public posts in the last 24 hours
     query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), ' \
             'INTERVAL 24 HOUR) AND is_pub = True ORDER BY item_id DESC'
     cursor.execute(query)
@@ -31,10 +33,12 @@ def index():
     cursor.close()
     return render_template('index.html', posts=data)
 
+#Renders login html file
 @app.route('/login')
 def login():
     return render_template('login.html')
 
+#Renders register html file
 @app.route('/register')
 def register():
     return render_template('register.html')
@@ -44,53 +48,45 @@ def register():
 #Authenticates the login
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
-    #grabs information from the forms
+    #grabs user login info from the forms
     username = request.form['email']
     password = request.form['password']
 
-    #cursor used to send queries
     cursor = conn.cursor()
-    #executes query
+    #Query that gets the user login info data
     query = 'SELECT * FROM person WHERE email = %s and password = SHA2(%s,256)'
     cursor.execute(query, (username, password))
-    #stores the results in a variable
     data = cursor.fetchone()
-    #use fetchall() if you are expecting more than 1 data row
     cursor.close()
     error = None
     if(data):
-        #creates a session for the the user
-        #session is a built in
         session['email'] = username
         return redirect(url_for('home'))
     else:
-        #returns an error message to the html page
+        #Returns an error message to the html pages
         error = 'Invalid login or email'
         return render_template('login.html', error=error)
 
-#Authenticates the register
+#Authenticates the registers
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
-    #grabs information from the forms
+    #Grabs user info from the form
     username = request.form['email']
     password = request.form['password']
     fname = request.form['fname']
     lname = request.form['lname']
 
-    #cursor used to send queries
     cursor = conn.cursor()
-    #executes query
     query = 'SELECT * FROM person WHERE email = %s'
     cursor.execute(query, (username))
-    #stores the results in a variable
     data = cursor.fetchone()
-    #use fetchall() if you are expecting more than 1 data row
     error = None
     if(data):
         #If the previous query returns data, then user exists
         error = "This user already exists"
-        return render_template('register.html', error = error)
+        return render_template('register.html', error=error)
     else:
+        #Add the user to the database
         ins = 'INSERT INTO person VALUES(%s, SHA2(%s,256), %s, %s)'
         cursor.execute(ins, (username, password, fname, lname))
         conn.commit()
@@ -98,24 +94,31 @@ def registerAuth():
         return render_template('index.html')
 
 
+#Home page after user logins
+#Displays public posts, user posts, and awaiting tags
 @app.route('/home')
 def home():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY post_time DESC'
+    query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY ' \
+            'post_time DESC'
     cursor.execute(query)
     data = cursor.fetchall()
-    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY post_time DESC'
+    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY ' \
+            'post_time DESC'
     cursor.execute(query, (user))
     data1 = cursor.fetchall()
     query = 'SELECT fname, lname FROM person WHERE email = %s'
     cursor.execute(query, (user))
     name = cursor.fetchone()
-    query = 'SELECT item_id, email_tagger FROM tag WHERE email_tagged = %s AND status = "FALSE" ORDER BY tagtime DESC'
+    query = 'SELECT item_id, email_tagger FROM tag WHERE email_tagged = %s ' \
+            'AND status = "FALSE" ORDER BY tagtime DESC'
     cursor.execute(query, (user))
     data2 = cursor.fetchall()
     cursor.close()
     return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
+
+
 
 @app.route('/post', methods=['GET','POST'])
 def post():
@@ -144,12 +147,13 @@ def post():
 def shared():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN contentitem WHERE email = %s'
+    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
+            'contentitem WHERE email = %s'
     cursor.execute(query, (user))
     data = cursor.fetchall()
     query = 'SELECT contentitem.item_id, email_post, post_time, file_path, ' \
-            'item_name, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN contentitem ' \
-            'GROUP BY item_id HAVING emo_count > 5'
+            'item_name, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN ' \
+            'contentitem GROUP BY item_id HAVING emo_count > 5'
     cursor.execute(query)
     data2 = cursor.fetchall()
     cursor.close()
@@ -165,7 +169,9 @@ def show_posts():
     ins = 'SELECT * FROM contentitem WHERE item_id = %s'
     cursor.execute(ins, (item))
     data = cursor.fetchall()
-    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
+            'tag.email_tagged = person.email WHERE item_id = %s ' \
+            'AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
     ins = 'SELECT DISTINCT fg_name, owner_email FROM belong WHERE email = %s'
@@ -178,7 +184,8 @@ def show_posts():
     cursor.execute(ins, (item))
     data4 = cursor.fetchall()
     cursor.close()
-    return render_template('show_posts.html', post = data, tags = data1, groups = data2, comments = data3, ratings = data4)
+    return render_template('show_posts.html', post = data, tags = data1,
+            groups = data2, comments = data3, ratings = data4)
 
 @app.route('/comment', methods=['GET', 'POST'])
 def comment():
@@ -234,10 +241,16 @@ def show_visibleposts():
     ins = 'SELECT * FROM contentitem WHERE item_id = %s'
     cursor.execute(ins, (item))
     data = cursor.fetchall()
-    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
+            'tag.email_tagged = person.email ' \
+            'WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
-    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong AS b WHERE email = %s AND status = "TRUE" AND (fg_name, owner_email) in (SELECT fg_name, owner_email FROM belong WHERE email = %s AND fg_name = b.fg_name AND owner_email = b.owner_email AND status = "TRUE")'
+    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong AS b WHERE ' \
+            'email = %s AND status = "TRUE" AND (fg_name, owner_email) in ' \
+            '(SELECT fg_name, owner_email FROM belong WHERE email = %s ' \
+            'AND fg_name = b.fg_name AND ' \
+            'owner_email = b.owner_email AND status = "TRUE")'
     cursor.execute(ins, (poster, user))
     data2 = cursor.fetchall()
     ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
@@ -247,7 +260,8 @@ def show_visibleposts():
     cursor.execute(ins, (item))
     data4 = cursor.fetchall()
     cursor.close()
-    return render_template('show_visibleposts.html', post = data, tags = data1, groups = data2, comments = data3, ratings = data4)
+    return render_template('show_visibleposts.html', post = data,
+        tags = data1, groups = data2, comments = data3, ratings = data4)
 
 @app.route('/show_publicposts', methods=['GET','POST'])
 def show_publicposts():
@@ -260,7 +274,8 @@ def show_publicposts():
     ins = 'SELECT * FROM contentitem WHERE item_id = %s'
     cursor.execute(ins, (item))
     data = cursor.fetchall()
-    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
+        'tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
     ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
@@ -270,7 +285,8 @@ def show_publicposts():
     cursor.execute(ins, (item))
     data3 = cursor.fetchall()
     cursor.close()
-    return render_template('show_publicposts.html', post = data, tags = data1, comments = data2, ratings = data3)
+    return render_template('show_publicposts.html', post = data, tags = data1,
+            comments = data2, ratings = data3)
 
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
@@ -299,7 +315,8 @@ def share_post():
     group = request.form['group']
     owner = request.form['owner']
     cursor = conn.cursor();
-    query = 'SELECT * FROM share WHERE item_id = %s AND owner_email = %s AND fg_name = %s'
+    query = 'SELECT * FROM share WHERE item_id = %s AND ' \
+            'owner_email = %s AND fg_name = %s'
     cursor.execute(query, (item, owner, group))
     #stores the results in a variable
     data = cursor.fetchone()
@@ -327,7 +344,8 @@ def tag():
     cursor.execute(query, (tagged, item))
     #stores the results in a variable
     data = cursor.fetchone()
-    query1 = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN contentitem WHERE (email = %s AND item_id = %s) OR is_pub = TRUE'
+    query1 = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
+            'contentitem WHERE (email = %s AND item_id = %s) OR is_pub = TRUE'
     cursor.execute(query, (tagger, item))
     #stores the results in a variable
     data1 = cursor.fetchone()
@@ -358,7 +376,8 @@ def tag_group():
     #cursor used to send queries
     cursor = conn.cursor()
     #executes query
-    query = 'SELECT * FROM belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
+    query = 'SELECT * FROM belong WHERE owner_email = %s ' \
+            'AND fg_name = %s AND email = %s'
     cursor.execute(query, (owner, taggedGroup, tagger))
     data = cursor.fetchone()
     query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s'
@@ -394,13 +413,18 @@ def tag_group():
 def friendgroup():
     user = session['email']
     cursor = conn.cursor();
-    ins = 'SELECT friendgroup.fg_name, friendgroup.description FROM friendgroup WHERE owner_email = %s'
+    ins = 'SELECT friendgroup.fg_name, friendgroup.description ' \
+            'FROM friendgroup WHERE owner_email = %s'
     cursor.execute(ins, (user))
     data = cursor.fetchall()
-    ins = 'SELECT DISTINCT friendgroup.owner_email, friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
+    ins = 'SELECT DISTINCT friendgroup.owner_email, friendgroup.fg_name, ' \
+            'friendgroup.description FROM belong JOIN friendgroup USING ' \
+            '(owner_email) WHERE email = %s AND owner_email <> %s'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
-    ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name,owner_email'
+    ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN ' \
+            'person USING (email) WHERE email = %s AND ' \
+            'status = "FALSE" GROUP BY fg_name,owner_email'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
     return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
@@ -436,11 +460,13 @@ def show_group():
     session['friendgroup'] = friendgroup
     user = session['email']
     cursor = conn.cursor();
-    ins = 'SELECT description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    ins = 'SELECT description FROM friendgroup WHERE ' \
+            'owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (user, friendgroup))
     data = cursor.fetchone()
     #double check query!
-    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
+    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN ' \
+        'person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(ins, (user, friendgroup))
     data1 = cursor.fetchall()
     cursor.close()
@@ -452,10 +478,12 @@ def show_belonggroup():
     session['friendgroup'] = friendgroup
     owner = request.form['owner']
     cursor = conn.cursor();
-    ins = 'SELECT owner_email, description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    ins = 'SELECT owner_email, description FROM friendgroup ' \
+            'WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (owner, friendgroup))
     data = cursor.fetchone()
-    ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
+    ins = 'SELECT fname, lname, person.email FROM belong ' \
+            'NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (owner, friendgroup))
     data1 = cursor.fetchall()
     cursor.close()
@@ -468,10 +496,12 @@ def tag_ad():
     user = session['email']
     cursor = conn.cursor();
     if(tag == 1) :
-        ins = 'UPDATE tag SET status = "TRUE" WHERE item_id = %s AND email_tagged = %s'
+        ins = 'UPDATE tag SET status = "TRUE" WHERE ' \
+            'item_id = %s AND email_tagged = %s'
         cursor.execute(ins, (item, user))
     else:
-        ins = 'DELETE FROM tag WHERE item_id = %s AND email_tagged = %s AND status = "FALSE"'
+        ins = 'DELETE FROM tag WHERE item_id = %s AND ' \
+            'email_tagged = %s AND status = "FALSE"'
         cursor.execute(ins, (item, user))
     conn.commit()
     cursor.close()
@@ -486,10 +516,12 @@ def member_ad():
     tag = int(request.form['tag'])
     cursor = conn.cursor();
     if(tag == 1) :
-        ins = 'UPDATE belong SET status = "TRUE" WHERE email = %s AND owner_email = %s AND fg_name = %s'
+        ins = 'UPDATE belong SET status = "TRUE" WHERE email = %s ' \
+                'AND owner_email = %s AND fg_name = %s'
         cursor.execute(ins, (user, owner, name))
     else:
-        ins = 'DELETE FROM belong WHERE email = %s AND owner_email = %s AND fg_name = % AND status = "FALSE"'
+        ins = 'DELETE FROM belong WHERE email = %s AND ' \
+            'owner_email = %s AND fg_name = % AND status = "FALSE"'
         cursor.execute(ins, (user, owner, name))
     conn.commit()
     cursor.close()
@@ -503,7 +535,8 @@ def invite_member():
     lname  = request.form['lmember']
     group = session['friendgroup']
     cursor = conn.cursor();
-    query = 'SELECT * FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND fname = %s AND lname = %s'
+    query = 'SELECT * FROM belong NATURAL JOIN person WHERE ' \
+            'owner_email = %s AND fg_name = %s AND fname = %s AND lname = %s'
     cursor.execute(query, (user, group, fname, lname))
     #stores the results in a variable
     data = cursor.fetchall()
