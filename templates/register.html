@@ -7,10 +7,10 @@
 <body>
 <center>
 <form action="/registerAuth" method="POST">
-	<input type="email" name="email" placeholder="email"/> </br>
-  <input type="password" name="password" placeholder="password"/> </br>
-  <input type="text" name="fname" placeholder="First Name"/> </br>
-  <input type="text" name="lname" placeholder="Last Name"/> </br>
+	<input type="email" name="email" placeholder="email" required/> </br>
+  <input type="password" name="password" placeholder="password" required/> </br>
+  <input type="text" name="fname" placeholder="First Name" required/> </br>
+  <input type="text" name="lname" placeholder="Last Name" required/> </br>
 	<input type="submit" value = Register />
 	{% if error %}
 		<p class="error"><strong>Error:</strong> {{error}}</p>
