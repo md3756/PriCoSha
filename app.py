@@ -5,21 +5,21 @@ app = Flask(__name__)
 
 #WAMP server
 #Configure MySQL
-conn = pymysql.connect(host='localhost',
-                       user='root',
-                       password = '',
-                       db='pricosha',
-                       charset='utf8mb4',
-                       cursorclass=pymysql.cursors.DictCursor)
-
-#MAMP server
 #conn = pymysql.connect(host='localhost',
 #                       user='root',
-#                       password = 'root',
-#                       port = 8889,
+#                       password = '',
 #                       db='pricosha',
 #                       charset='utf8mb4',
 #                       cursorclass=pymysql.cursors.DictCursor)
+
+#MAMP server
+conn = pymysql.connect(host='localhost',
+                       user='root',
+                       password = 'root',
+                       port = 8889,
+                       db='pricosha',
+                       charset='utf8mb4',
+                       cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
 def index():
@@ -126,9 +126,12 @@ def post():
     if(is_pub == 1 and file_path):
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, TRUE)'
         cursor.execute(ins, (user, file_path, post))
-    elif(file_path):
+    elif(is_pub == 0 and file_path):
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, FALSE)'
         cursor.execute(ins, (user, file_path, post))
+    elif(is_pub == 1):
+        ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, TRUE)'
+        cursor.execute(ins, (user, post))
     else:
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, FALSE)'
         cursor.execute(ins, (user, post))
@@ -323,11 +326,19 @@ def tag():
     cursor.execute(query, (tagged, item))
     #stores the results in a variable
     data = cursor.fetchone()
+    query1 = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN contentitem WHERE (email = %s AND item_id = %s) OR is_pub = TRUE'
+    cursor.execute(query, (tagger, item))
+    #stores the results in a variable
+    data1 = cursor.fetchone()
     error = None
     if(data):
         #If the previous query returns data, then tag exists
         error = "This tag already exists"
     else:
+        notag = False
+        for line in data1:
+            if(tagged not in line['email]):
+                notag = True
         if (tagger == tagged):
             ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
         else:
