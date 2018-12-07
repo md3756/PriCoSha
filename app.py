@@ -16,7 +16,7 @@ app = Flask(__name__)
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password = 'root',
-                       port = 8889,
+                       port = 3308,
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -24,7 +24,8 @@ conn = pymysql.connect(host='localhost',
 @app.route('/')
 def index():
     cursor = conn.cursor()
-    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), INTERVAL 24 HOUR) AND is_pub = True ORDER BY item_id DESC'
+    query = 'SELECT * FROM contentitem WHERE post_time > DATE_SUB(NOW(), ' \
+            'INTERVAL 24 HOUR) AND is_pub = True ORDER BY item_id DESC'
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
@@ -337,7 +338,7 @@ def tag():
     else:
         notag = False
         for line in data1:
-            if(tagged not in line['email]):
+            if(tagged not in line['email']):
                 notag = True
         if (tagger == tagged):
             ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
