@@ -62,13 +62,35 @@ Basic Info:
 	{% endfor %}
 </table>
 <br>
-Comments and Ratings:
+Comment:
+<br>
+<form action='/comment' method="POST">
+    <input type="text" name="the_comment" placeholder="(Limited to 140 characters)"/>
+    <br>
+    <input type="submit" name="the_comment" value = "Add a comment" />
+</form>
+<br>
+
+Rate:
+😍<input type="radio" value="😍" />
+😂<input type = "radio" value="😂" />
+👍<input type="radio" value="👍" />
+<input type="submit" value=rate />
 
 <br>
-<textarea name="comment" cols="40" rows="5" placeholder="(Limited to 140 characters)"></textarea>
-<br>
-<input type="submit" value = "Add a comment" />
-<br>
+Comments:
+<table>
+    <table>
+        <th>Email</th>
+        <th>Comment</th>
+        
+        {% for line in comments %}
+        <tr>
+            <td>{{line.email}}</td>
+            <td>{{line.comment}}</td>
+        </tr>
+        {% endfor %}
+    </table>
 <br>
 
 Friends Tagged in Picture:

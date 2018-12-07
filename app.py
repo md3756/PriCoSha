@@ -7,7 +7,7 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       port=3308,
+                       port=8889,
                        password = 'root',
                        db='pricosha',
                        charset='utf8mb4',
@@ -163,7 +163,24 @@ def show_posts():
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
     cursor.close()
-    return render_template('show_posts.html', post = data, tags = data1, groups = data2)
+    cursor = conn.cursor()
+    ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data3 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_posts.html', post = data, tags = data1, groups = data2, comments = data3)
+
+@app.route('/comment', methods=['GET', 'POST'])
+def comment():
+    email = session['email']
+    item = session['item_id']
+    comment = request.form['the_comment']
+    cursor = conn.cursor()
+    ins = 'INSERT INTO comments VALUES(%s, %s, NOW(), %s)'
+    cursor.execute(ins, (email, item, comment))
+    conn.commit()
+    cursor.close()
+    return redirect(url_for('home'))
 
 @app.route('/show_visibleposts', methods=['GET','POST'])
 def show_visibleposts():
