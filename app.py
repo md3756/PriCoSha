@@ -451,9 +451,11 @@ def tag():
     item = session['item_id']
     cursor = conn.cursor()
     
+    #Get all data for post that is tagged
     query = 'SELECT * FROM tag WHERE email_tagged = %s AND item_id = %s'
     cursor.execute(query, (tagged, item))
     data = cursor.fetchone()
+
 
     query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
             'contentitem WHERE item_id = %s AND email = %s AND belong.status = "TRUE"'
@@ -682,6 +684,9 @@ def invite_member():
     #stores the results in a variable
     data2 = cursor.fetchall()
     error = None
+    lst = []
+    for invited in data:
+        lst.append(invited["email"])
     if not (data1):
         error = "This group does not exist"
     elif not (data2):
@@ -692,10 +697,8 @@ def invite_member():
                 ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
                 cursor.execute(ins, (name["email"], user, group))
             else:
-                lst = []
-                for invited in data:
-                    lst.append(invited["email"])
                 if name['email'] not in lst:
+                    error = None
                     ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
                     cursor.execute(ins, (name["email"], user, group))
                     conn.commit()
