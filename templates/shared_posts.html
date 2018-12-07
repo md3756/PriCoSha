@@ -45,7 +45,7 @@
 	  </header>
 </nav>
 
-<h1>Here's what your friends have shared!</h1>
+<h1>Here's what you and your friends have shared!</h1>
 
 <table>
   <th>Item ID</th>
@@ -77,12 +77,11 @@ Here are the top rated posts!
 	<th>File Path</th>
 	<th>Item Name</th>
 
-{% for line in posts %}
+{% for line in emoji1 %}
 	<tr>
-		<form action="/show_visibleposts" method="POST">
-		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
-    <td><input type="hidden" name ="poster" value = "{{line.email_post}}" />{{line.email_post}}</td>
-    <td>{{line.post_time}}</td>
+		<td>{{line.item_id}}"</td>
+    <td>{{line.email_post}}</td>
+    <td>{{line.post_time}}</td>s
     <td>{{line.file_path}}</td>
     <td>{{line.item_name}}</td>
 

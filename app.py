@@ -7,8 +7,7 @@ app = Flask(__name__)
 #Configure MySQL
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       port=8889,
-                       password = 'root',
+                       password = '',
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -132,15 +131,12 @@ def post():
 def shared():
     user = session['email']
     cursor = conn.cursor();
-    query = 'SELECT DISTINCT contentitem.item_id, contentitem.email_post, ' \
-            'contentitem.post_time, contentitem.file_path, contentitem.item_name ' \
-            'FROM contentitem NATURAL JOIN share NATURAL JOIN belong WHERE is_pub <> TRUE AND item_id '  \
-            'NOT IN (SELECT item_id FROM contentitem WHERE email_post = %s )'
+    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN contentitem WHERE email = %s'
     cursor.execute(query, (user))
     data = cursor.fetchall()
     query = 'SELECT contentitem.item_id, email_post, post_time, file_path, ' \
-            'item_name, COUNT(emoji) FROM rate NATURAL JOIN contentitem ' \
-            'GROUP BY item_id HAVING COUNT(emoji) > 5'
+            'item_name, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN contentitem ' \
+            'GROUP BY item_id HAVING emo_count > 5'
     cursor.execute(query)
     data2 = cursor.fetchall()
     cursor.close()
