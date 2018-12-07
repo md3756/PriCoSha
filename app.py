@@ -204,7 +204,26 @@ def comment():
         cursor.execute(ins, (email, item, comment))
         conn.commit()
         cursor.close()
-    return redirect(url_for('home'))
+    user = session['email']
+    cursor = conn.cursor();
+    query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY ' \
+        'post_time DESC'
+    cursor.execute(query)
+    data = cursor.fetchall()
+    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY ' \
+            'post_time DESC'
+    cursor.execute(query, (user))
+    data1 = cursor.fetchall()
+    query = 'SELECT fname, lname FROM person WHERE email = %s'
+    cursor.execute(query, (user))
+    name = cursor.fetchone()
+    query = 'SELECT item_id, email_tagger FROM tag WHERE email_tagged = %s ' \
+            'AND status = "FALSE" ORDER BY tagtime DESC'
+    cursor.execute(query, (user))
+    data2 = cursor.fetchall()
+    cursor.close()
+    return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2, error = error)
+
 
 @app.route('/rate', methods=['GET', 'POST'])
 def rate():
@@ -345,24 +364,29 @@ def tag():
     #stores the results in a variable
     data = cursor.fetchone()
     query1 = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
-            'contentitem WHERE item_id = %s AND (email = %s OR is_pub = TRUE)'
+            'contentitem WHERE item_id = %s AND email = %s'
     cursor.execute(query, (item, tagged))
     #stores the results in a variable
     data1 = cursor.fetchone()
+    query2 = 'SELECT * FROM contentitem WHERE item_id = %s AND is_pub = TRUE'
+    cursor.execute(query, (item, tagged))
+    #stores the results in a variable
+    data2 = cursor.fetchone()
     error = None
     if(data):
         #If the previous query returns data, then tag exists
         error = "This tag already exists"
-    elif(not data1):
-        error = "This post is not public or this post is not visible to tagged"
     else:
-        if (tagger == tagged):
-            ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
-        else:
-            ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
-        cursor.execute(ins, (tagged, tagger, item))
-        conn.commit()
-        cursor.close()
+        if(not data2 and not data1):
+                error = "This post is not visible to person tagged"
+        elif(data1 or data2):
+            if (tagger == tagged):
+                ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
+            else:
+                ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
+            cursor.execute(ins, (tagged, tagger, item))
+            conn.commit()
+            cursor.close()
     return redirect(url_for('home'))
 
 @app.route('/tag_group', methods=['GET','POST'])
