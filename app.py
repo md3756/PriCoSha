@@ -385,7 +385,7 @@ def friendgroup():
     ins = 'SELECT friendgroup.fg_name, friendgroup.description FROM friendgroup WHERE owner_email = %s'
     cursor.execute(ins, (user))
     data = cursor.fetchall()
-    ins = 'SELECT DISTINCT friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
+    ins = 'SELECT DISTINCT friendgroup.owner_email, friendgroup.fg_name, friendgroup.description FROM belong JOIN friendgroup USING (owner_email) WHERE email = %s AND owner_email <> %s'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
     ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN person USING (email) WHERE email = %s AND status = "FALSE" GROUP BY fg_name,owner_email'
@@ -440,7 +440,7 @@ def show_belonggroup():
     session['friendgroup'] = friendgroup
     owner = request.form['owner']
     cursor = conn.cursor();
-    ins = 'SELECT description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    ins = 'SELECT owner_email, description FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (owner, friendgroup))
     data = cursor.fetchone()
     ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s'
