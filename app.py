@@ -121,9 +121,11 @@ def homeError(error):
     data2 = cursor.fetchall()
     cursor.close()
     if error != None:
-        return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2, error = error)
+        return render_template('home.html', username=user, posts=data,
+                posts_user = data1, name=name, tags = data2, error = error)
     else:
-        return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
+        return render_template('home.html', username=user,
+                posts=data, posts_user = data1, name=name, tags = data2)
 
 
 #Allows user to post text either publicly or privately to friendgroup
@@ -208,12 +210,15 @@ def shared():
     user = session['email']
     cursor = conn.cursor();
     query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
-            'contentitem WHERE email = %s AND belong.status = "TRUE" AND email_post <> %s AND is_pub = FALSE'
+            'contentitem WHERE email = %s AND belong.status = "TRUE" ' \
+            'AND email_post <> %s AND is_pub = FALSE'
     cursor.execute(query, (user, user))
     data = cursor.fetchall()
     query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
-            'contentitem NATURAL JOIN (SELECT item_id, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN ' \
-            'contentitem GROUP BY item_id HAVING emo_count > 5) AS top_rated WHERE email = %s AND belong.status = "TRUE"'
+            'contentitem NATURAL JOIN (SELECT item_id, COUNT(emoji) ' \
+            'AS emo_count FROM rate NATURAL JOIN ' \
+            'contentitem GROUP BY item_id HAVING emo_count > 5) ' \
+            'AS top_rated WHERE email = %s AND belong.status = "TRUE"'
     cursor.execute(query, (user))
     data2 = cursor.fetchall()
     cursor.close()
@@ -235,7 +240,8 @@ def show_posts():
             'AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
-    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong WHERE email = %s AND status = "TRUE"'
+    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong ' \
+            'WHERE email = %s AND status = "TRUE"'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
     ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
@@ -414,7 +420,8 @@ def tag_group():
             'AND fg_name = %s AND item_id = %s'
     cursor.execute(query, (owner, taggedGroup, item))
     data = cursor.fetchone()
-    query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
+    query = 'SELECT email FROM belong WHERE owner_email = %s ' \
+            'AND fg_name = %s AND status = "TRUE"'
     cursor.execute(query, (owner, taggedGroup))
     data1 = cursor.fetchall()
     query = 'SELECT email_tagged FROM tag WHERE item_id = %s'
@@ -468,9 +475,11 @@ def friendgroupError(error):
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
     if error != None:
-        return render_template('friendgroup.html', group = data, group1 = data1, members = data2, error = error)
+        return render_template('friendgroup.html', group = data,
+            group1 = data1, members = data2, error = error)
     else:
-        return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
+        return render_template('friendgroup.html',
+                group = data, group1 = data1, members = data2)
 
 @app.route('/create_friendgroup', methods=['GET','POST'])
 def create_friendgroup():
