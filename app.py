@@ -5,6 +5,14 @@ app = Flask(__name__)
 
 #WAMP server
 #Configure MySQL
+#conn = pymysql.connect(host='localhost',
+#                       user='root',
+#                       password = '',
+#                       db='pricosha',
+#                       charset='utf8mb4',
+#                       cursorclass=pymysql.cursors.DictCursor)
+
+#MAMP server
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password = 'root',
