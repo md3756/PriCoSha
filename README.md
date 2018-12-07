@@ -6,11 +6,11 @@ PriCoSha is a system of privately sharing content items among groups of people. 
 ### **Features**
 
 ##### View public content
-  Shows users the item_id, email_post, post_time, file_path and item_name of the public content items that were posted within the last 24 hours
+  Shows users the item_id, email_post, post_time, file_path and item_name of the public content items that were posted within the last 24 hours. This is shown on the 'Welcome to PriCoSha' page in which the user can login or register.
 
 ##### Login
 
-  Users enter email and passwords. PriCoSha checks whether the hash of password matches stored password for that email and initiates a session, stores email and other relevant data in session variables, and redirects to the home page. Otherwise, the user is informed by PriCoSha informs the user that the login failed and does not initiate the session.
+  Users enter email and passwords. PriCoSha checks whether the hash of password matches stored password for that email and initiates a session, stores email and other relevant data in session variables, and redirects to the home page. Otherwise, the user is informed by PriCoSha informs the user that the login failed and does not initiate the session. There is a link on the 'Welcome to PriCoSha' page for logging in that will redirect the user to a login page.
 
 ##### View shared content items and info about them
 
@@ -64,3 +64,7 @@ PriCoSha is a system of privately sharing content items among groups of people. 
   Users can tag multiple users
 
 ### **Member Contributions**
+Mithila:
+Daisy:
+Hannah:
+Lyanne:

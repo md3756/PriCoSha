@@ -5,21 +5,21 @@ app = Flask(__name__)
 
 #WAMP server
 #Configure MySQL
-conn = pymysql.connect(host='localhost',
-                      user='root',
-                      password = '',
-                      db='pricosha',
-                      charset='utf8mb4',
-                      cursorclass=pymysql.cursors.DictCursor)
+# conn = pymysql.connect(host='localhost',
+#                       user='root',
+#                       password = '',
+#                       db='pricosha',
+#                       charset='utf8mb4',
+#                       cursorclass=pymysql.cursors.DictCursor)
 
 #MAMP server
-# conn = pymysql.connect(host='localhost',
-#                        user='root',
-#                        password = 'root',
-#                        port = 8889,
-#                        db='pricosha',
-#                        charset='utf8mb4',
-#                        cursorclass=pymysql.cursors.DictCursor)
+conn = pymysql.connect(host='localhost',
+                       user='root',
+                       password = 'root',
+                       port = 3308,
+                       db='pricosha',
+                       charset='utf8mb4',
+                       cursorclass=pymysql.cursors.DictCursor)
 
 #Welcome Page for PriCoSha
 @app.route('/')
