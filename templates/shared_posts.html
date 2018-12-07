@@ -40,12 +40,12 @@
 	    <ul>
 	      <a href ="/home"><li>HOME</li></a>
 				<a href ="/friendgroup"><li>FRIENDS</li></a>
-				<a href ="/shared"><li>SHARED/GEO POSTS</li></a>
+				<a href ="/shared"><li>SHARED/TOP RATED POSTS</li></a>
 	    </ul>
 	  </header>
 </nav>
 
-<h1>Here's what you and your friends have shared!</h1>
+<h1>Here's what your friends have shared with you!</h1>
 
 <table>
   <th>Item ID</th>
@@ -66,7 +66,7 @@
     <td>{{line.item_name}}</td>
     <td>{{line.fg_name}}</td>
     <td>{{line.owner_email}}</td>
-    
+
     </form>
 	</tr>
 {% endfor %}
@@ -74,22 +74,24 @@
 </table>
 
 <br>
-Here are the top rated posts!
+Here are the top rated posts among you and your friends!
 <table>
   <th>Item ID</th>
 	<th>Email Post</th>
 	<th>Post Time</th>
 	<th>File Path</th>
 	<th>Item Name</th>
+  <th>Number of Rates</th>
 
 {% for line in emoji1 %}
 	<tr>
-		<td>{{line.item_id}}"</td>
-    <td>{{line.email_post}}</td>
-    <td>{{line.post_time}}</td>s
+    <form action="/show_visibleposts" method="POST">
+		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
+    <td><input type="hidden" name ="poster" value = "{{line.email_post}}" />{{line.email_post}}</td>
+    <td>{{line.post_time}}</td>
     <td>{{line.file_path}}</td>
     <td>{{line.item_name}}</td>
-
+    <td>{{line.emo_count}}</td>
     </form>
 	</tr>
 {% endfor %}

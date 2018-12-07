@@ -5,21 +5,21 @@ app = Flask(__name__)
 
 #WAMP server
 #Configure MySQL
-#conn = pymysql.connect(host='localhost',
-#                       user='root',
-#                       password = '',
-#                       db='pricosha',
-#                       charset='utf8mb4',
-#                       cursorclass=pymysql.cursors.DictCursor)
+conn = pymysql.connect(host='localhost',
+                      user='root',
+                      password = '',
+                      db='pricosha',
+                      charset='utf8mb4',
+                      cursorclass=pymysql.cursors.DictCursor)
 
 #MAMP server
-conn = pymysql.connect(host='localhost',
-                       user='root',
-                       password = 'root',
-                       port = 8889,
-                       db='pricosha',
-                       charset='utf8mb4',
-                       cursorclass=pymysql.cursors.DictCursor)
+# conn = pymysql.connect(host='localhost',
+#                        user='root',
+#                        password = 'root',
+#                        port = 8889,
+#                        db='pricosha',
+#                        charset='utf8mb4',
+#                        cursorclass=pymysql.cursors.DictCursor)
 
 #Welcome Page for PriCoSha
 @app.route('/')
@@ -100,6 +100,7 @@ def registerAuth():
 def home():
     return homeError(None)
 
+#Displays home.html in the case where it needs to display an error message or not
 def homeError(error):
     user = session['email']
     cursor = conn.cursor();
@@ -125,7 +126,6 @@ def homeError(error):
         return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
 
 
-
 #Allows user to post text either publicly or privately to friendgroup
 #Inserts user's post into database
 @app.route('/post', methods=['GET','POST'])
@@ -149,53 +149,11 @@ def post():
         cursor.execute(ins, (user, post))
     conn.commit()
     cursor.close()
-    return homeError(error)
+    return homeError(None)
 
 
-@app.route('/shared', methods=['GET','POST'])
-def shared():
-    user = session['email']
-    cursor = conn.cursor();
-    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
-            'contentitem WHERE email = %s'
-    cursor.execute(query, (user))
-    data = cursor.fetchall()
-    query = 'SELECT contentitem.item_id, email_post, post_time, file_path, ' \
-            'item_name, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN ' \
-            'contentitem GROUP BY item_id HAVING emo_count > 5'
-    cursor.execute(query)
-    data2 = cursor.fetchall()
-    cursor.close()
-    return render_template('shared_posts.html', posts=data, emoji1=data2)
-
-
-@app.route('/show_posts', methods=['GET','POST'])
-def show_posts():
-    item = request.form['post']
-    session['item_id'] = item
-    user = session['email']
-    cursor = conn.cursor();
-    ins = 'SELECT * FROM contentitem WHERE item_id = %s'
-    cursor.execute(ins, (item))
-    data = cursor.fetchall()
-    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
-            'tag.email_tagged = person.email WHERE item_id = %s ' \
-            'AND status = "TRUE"'
-    cursor.execute(ins, (item))
-    data1 = cursor.fetchall()
-    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong WHERE email = %s'
-    cursor.execute(ins, (user))
-    data2 = cursor.fetchall()
-    ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
-    cursor.execute(ins, (item))
-    data3 = cursor.fetchall()
-    ins = 'SELECT email, emoji FROM rate WHERE item_id = %s'
-    cursor.execute(ins, (item))
-    data4 = cursor.fetchall()
-    cursor.close()
-    return render_template('show_posts.html', post = data, tags = data1,
-            groups = data2, comments = data3, ratings = data4)
-
+#Allows user to post 1 comments on a post
+#Adds comments into the comments table in mySQL
 @app.route('/comment', methods=['GET', 'POST'])
 def comment():
     email = session['email']
@@ -213,28 +171,10 @@ def comment():
         cursor.execute(ins, (email, item, comment))
         conn.commit()
         cursor.close()
-    user = session['email']
-    cursor = conn.cursor();
-    query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY ' \
-        'post_time DESC'
-    cursor.execute(query)
-    data = cursor.fetchall()
-    query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY ' \
-            'post_time DESC'
-    cursor.execute(query, (user))
-    data1 = cursor.fetchall()
-    query = 'SELECT fname, lname FROM person WHERE email = %s'
-    cursor.execute(query, (user))
-    name = cursor.fetchone()
-    query = 'SELECT item_id, email_tagger FROM tag WHERE email_tagged = %s ' \
-            'AND status = "FALSE" ORDER BY tagtime DESC'
-    cursor.execute(query, (user))
-    data2 = cursor.fetchall()
-    cursor.close()
-    return render_template('home.html', username=user, posts=data,
-            posts_user = data1, name=name, tags = data2, error = error)
+    return homeError(error)
 
-
+#Allows user to rate a post once
+#Adds rating into the rates table in mySQL
 @app.route('/rate', methods=['GET', 'POST'])
 def rate():
     email = session['email']
@@ -260,7 +200,58 @@ def rate():
         cursor.close()
     return homeError(error)
 
+#Shows the posts visible to user since the posts were shared by their friends
+#Also shows top rated posts of user's friends and the user which posts that have more than 5 ratings
+#The user can link to the top rated post and leave a rating
+@app.route('/shared', methods=['GET','POST'])
+def shared():
+    user = session['email']
+    cursor = conn.cursor();
+    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
+            'contentitem WHERE email = %s AND belong.status = "TRUE" AND email_post <> %s AND is_pub = FALSE'
+    cursor.execute(query, (user, user))
+    data = cursor.fetchall()
+    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
+            'contentitem NATURAL JOIN (SELECT item_id, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN ' \
+            'contentitem GROUP BY item_id HAVING emo_count > 5) AS top_rated WHERE email = %s AND belong.status = "TRUE"'
+    cursor.execute(query, (user))
+    data2 = cursor.fetchall()
+    cursor.close()
+    return render_template('shared_posts.html', posts=data, emoji1=data2)
 
+#Shows the details of the user's post
+#Implements features such as edit post, share post, comment, rate, and tagging of a person or group
+@app.route('/show_posts', methods=['GET','POST'])
+def show_posts():
+    item = request.form['post']
+    session['item_id'] = item
+    user = session['email']
+    cursor = conn.cursor();
+    ins = 'SELECT * FROM contentitem WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data = cursor.fetchall()
+    ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
+            'tag.email_tagged = person.email WHERE item_id = %s ' \
+            'AND status = "TRUE"'
+    cursor.execute(ins, (item))
+    data1 = cursor.fetchall()
+    ins = 'SELECT DISTINCT fg_name, owner_email FROM belong WHERE email = %s AND status = "TRUE"'
+    cursor.execute(ins, (user))
+    data2 = cursor.fetchall()
+    ins = 'SELECT email, comment FROM comments WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data3 = cursor.fetchall()
+    ins = 'SELECT email, emoji FROM rate WHERE item_id = %s'
+    cursor.execute(ins, (item))
+    data4 = cursor.fetchall()
+    cursor.close()
+    return render_template('show_posts.html', post = data, tags = data1,
+            groups = data2, comments = data3, ratings = data4)
+
+
+
+#Shows the details of the posts shared to user privately
+#Implements features such as comment, rate, and tagging of a person or group
 @app.route('/show_visibleposts', methods=['GET','POST'])
 def show_visibleposts():
     item = request.form['post']
@@ -294,6 +285,8 @@ def show_visibleposts():
     return render_template('show_visibleposts.html', post = data,
         tags = data1, groups = data2, comments = data3, ratings = data4)
 
+#Shows the details of the public posts
+#Implements features such as comment, rate, and tagging of a person
 @app.route('/show_publicposts', methods=['GET','POST'])
 def show_publicposts():
     item = request.form['post']
@@ -318,6 +311,7 @@ def show_publicposts():
     cursor.close()
     return render_template('show_publicposts.html', post = data, tags = data1,
             comments = data2, ratings = data3)
+
 
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
@@ -374,25 +368,29 @@ def tag():
     #executes query
     query = 'SELECT * FROM tag WHERE email_tagged = %s AND item_id = %s'
     cursor.execute(query, (tagged, item))
-    #stores the results in a variable
     data = cursor.fetchone()
-    query1 = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
-            'contentitem WHERE item_id = %s AND email = %s'
+    query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
+            'contentitem WHERE item_id = %s AND email = %s AND belong.status = "TRUE"'
     cursor.execute(query, (item, tagged))
-    #stores the results in a variable
     data1 = cursor.fetchone()
-    query2 = 'SELECT * FROM contentitem WHERE item_id = %s AND is_pub = TRUE'
-    cursor.execute(query, (item, tagged))
-    #stores the results in a variable
+    query = 'SELECT * FROM contentitem WHERE item_id = %s AND is_pub = TRUE'
+    cursor.execute(query, (item))
     data2 = cursor.fetchone()
+    query = 'SELECT * FROM person WHERE email = %s'
+    cursor.execute(query, (tagged))
+    data3 = cursor.fetchall()
     error = None
-    if(data):
+    if not (data3):
+        error = "This person that you are trying to tag does not exist"
+    elif(data):
         #If the previous query returns data, then tag exists
         error = "This tag already exists"
     else:
+        #checks if the post is public or visible to tagged person
         if(not data2 and not data1):
                 error = "This post is not visible to person tagged"
-        elif(data1 or data2):
+        #elif(data1 or data2):
+        else:
             if (tagger == tagged):
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
             else:
@@ -416,7 +414,7 @@ def tag_group():
             'AND fg_name = %s AND item_id = %s'
     cursor.execute(query, (owner, taggedGroup, item))
     data = cursor.fetchone()
-    query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s'
+    query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(query, (owner, taggedGroup))
     data1 = cursor.fetchall()
     query = 'SELECT email_tagged FROM tag WHERE item_id = %s'
@@ -425,7 +423,7 @@ def tag_group():
     #use fetchall() if you are expecting more than 1 data row
     error = None
     if not (data):
-        error = "This post is not visible to this group"
+        error = "This post is not visible to this group or post is public"
     else:
         exists = False
         for line in data1:
@@ -433,7 +431,6 @@ def tag_group():
                 if line['email']== line1['email_tagged']:
                     error = "This person is already tagged or pending a tag"
                     exists = True
-
             if (tagger == line['email'] and not exists):
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
                 cursor.execute(ins, (line['email'], tagger, item))
@@ -446,8 +443,14 @@ def tag_group():
         cursor.close()
     return homeError(error)
 
+#FriendGroup page
+#Displays friendgroups that the user owns and belongs to and awaiting group invites requests
 @app.route('/friendgroup', methods=['GET','POST'])
 def friendgroup():
+    return friendgroupError(None)
+
+#Displays friendgroup.html in the case where it needs to display an error message or not
+def friendgroupError(error):
     user = session['email']
     cursor = conn.cursor();
     ins = 'SELECT friendgroup.fg_name, friendgroup.description ' \
@@ -464,8 +467,10 @@ def friendgroup():
             'status = "FALSE" GROUP BY fg_name,owner_email'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
-    return render_template('friendgroup.html', group = data,
-            group1 = data1, members = data2)
+    if error != None:
+        return render_template('friendgroup.html', group = data, group1 = data1, members = data2, error = error)
+    else:
+        return render_template('friendgroup.html', group = data, group1 = data1, members = data2)
 
 @app.route('/create_friendgroup', methods=['GET','POST'])
 def create_friendgroup():
@@ -481,7 +486,7 @@ def create_friendgroup():
     #use fetchall() if you are expecting more than 1 data row
     error = None
     if(data):
-        #If the previous query returns data, then tag exists
+        #If the query returns data, then group exists
         error = "This group already exists"
     else:
         ins = 'INSERT INTO friendgroup VALUES(%s, %s, %s)'
@@ -491,7 +496,7 @@ def create_friendgroup():
         cursor.execute(ins, (user, user, name))
         conn.commit()
         cursor.close()
-    return redirect(url_for('friendgroup'))
+    return friendgroupError(error)
 
 @app.route('/show_group', methods=['GET','POST'])
 def show_group():
@@ -567,7 +572,7 @@ def member_ad():
         cursor.execute(ins, (user, owner, name))
     conn.commit()
     cursor.close()
-    return redirect(url_for('home'))
+    return redirect(url_for('friendgroup'))
 
 @app.route('/invite_member', methods=['GET','POST'])
 def invite_member():
@@ -595,7 +600,7 @@ def invite_member():
     if not (data1):
         error = "This group does not exist"
     elif not (data2):
-        error = "This member does not exist"
+        error = "This person does not exist"
     else:
         for name in data2:
             if len(data) == 0:
@@ -612,7 +617,7 @@ def invite_member():
                 else:
                     error = name['fname'] + " " + name['lname'] + "(" + name['email'] + ") is already invited or a member"
         cursor.close()
-    return redirect(url_for('friendgroup'))
+    return friendgroupError(error)
 
 @app.route('/logout')
 def logout():

@@ -34,7 +34,7 @@
 		    <ul>
 		      <a href ="/home"><li>HOME</li></a>
 					<a href ="/friendgroup"><li>FRIENDS</li></a>
-					<a href ="/shared"><li>SHARED/GEO POSTS</li></a>
+					<a href ="/shared"><li>SHARED/TOP RATED POSTS</li></a>
 		    </ul>
 		  </header>
 	</nav>
@@ -85,7 +85,7 @@ Comments:
     <table>
         <th>Email</th>
         <th>Comment</th>
-        
+
         {% for line in comments %}
         <tr>
             <td>{{line.email}}</td>
@@ -94,13 +94,13 @@ Comments:
         {% endfor %}
     </table>
 <br>
-    
+
 Ratings:
 <table>
     <table>
         <th>Email</th>
         <th>Rating</th>
-        
+
         {% for line in ratings %}
         <tr>
             <td>{{line.email}}</td>
@@ -108,7 +108,7 @@ Ratings:
         </tr>
         {% endfor %}
     </table>
-    
+
     <br>
 
 Friends Tagged in Picture:

@@ -39,10 +39,15 @@
       <ul>
         <a href ="/home"><li>HOME</li></a>
         <a href ="/friendgroup"><li>FRIENDS</li></a>
-        <a href ="/shared"><li>SHARED/GEO POSTS</li></a>
+        <a href ="/shared"><li>SHARED/TOP RATED POSTS</li></a>
       </ul>
     </header>
 </nav>
+<h1>Friendgroup!</h1>
+{% if error %}
+    <p class="error"><strong>Error:</strong> {{error}}</p>
+{% endif %}
+<br>
 
 FriendGroup(s) Owned:
 <br>
