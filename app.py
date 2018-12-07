@@ -16,7 +16,7 @@ app = Flask(__name__)
 conn = pymysql.connect(host='localhost',
                        user='root',
                        password = 'root',
-                       port = 3308,
+                       port = 8889,
                        db='pricosha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -98,26 +98,32 @@ def registerAuth():
 #Displays public posts, user posts, and awaiting tags
 @app.route('/home')
 def home():
+    return homeError(None)
+
+def homeError(error):
     user = session['email']
     cursor = conn.cursor();
     query = 'SELECT * FROM contentitem WHERE is_pub = True ORDER BY ' \
-            'post_time DESC'
+        'post_time DESC'
     cursor.execute(query)
     data = cursor.fetchall()
     query = 'SELECT * FROM contentitem WHERE email_post = %s ORDER BY ' \
-            'post_time DESC'
+        'post_time DESC'
     cursor.execute(query, (user))
     data1 = cursor.fetchall()
     query = 'SELECT fname, lname FROM person WHERE email = %s'
     cursor.execute(query, (user))
     name = cursor.fetchone()
     query = 'SELECT item_id, email_tagger FROM tag WHERE email_tagged = %s ' \
-            'AND status = "FALSE" ORDER BY tagtime DESC'
+        'AND status = "FALSE" ORDER BY tagtime DESC'
     cursor.execute(query, (user))
     data2 = cursor.fetchall()
     cursor.close()
-    return render_template('home.html', username=user, posts=data,
-            posts_user = data1, name=name, tags = data2)
+    if error != None:
+        return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2, error = error)
+    else:
+        return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
+
 
 
 #Allows user to post text either publicly or privately to friendgroup
@@ -143,7 +149,7 @@ def post():
         cursor.execute(ins, (user, post))
     conn.commit()
     cursor.close()
-    return redirect(url_for('home'))
+    return homeError(error)
 
 
 @app.route('/shared', methods=['GET','POST'])
@@ -252,7 +258,8 @@ def rate():
         cursor.execute(ins, (email, item))
         conn.commit()
         cursor.close()
-    return redirect(url_for('home'))
+    return homeError(error)
+
 
 @app.route('/show_visibleposts', methods=['GET','POST'])
 def show_visibleposts():
@@ -354,7 +361,8 @@ def share_post():
         cursor.execute(ins, (owner, group, item))
         conn.commit()
         cursor.close()
-    return redirect(url_for('home'))
+    return homeError(error)
+
 
 @app.route('/tag', methods=['GET','POST'])
 def tag():
@@ -392,7 +400,8 @@ def tag():
             cursor.execute(ins, (tagged, tagger, item))
             conn.commit()
             cursor.close()
-    return redirect(url_for('home'))
+    return homeError(error)
+
 
 @app.route('/tag_group', methods=['GET','POST'])
 def tag_group():
@@ -435,7 +444,7 @@ def tag_group():
                 conn.commit()
             exists = False
         cursor.close()
-    return redirect(url_for('home'))
+    return homeError(error)
 
 @app.route('/friendgroup', methods=['GET','POST'])
 def friendgroup():
