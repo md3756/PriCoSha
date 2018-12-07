@@ -77,7 +77,7 @@ Here are the top rated posts!
 	<th>File Path</th>
 	<th>Item Name</th>
 
-{% for line in posts %}
+{% for line in emoji1 %}
 	<tr>
 		<form action="/show_visibleposts" method="POST">
 		<td><input type="submit" name ="post" value = "{{line.item_id}}" /></td>
