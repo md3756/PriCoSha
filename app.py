@@ -381,41 +381,6 @@ def show_group():
     cursor.close()
     return render_template('show_group.html', name = friendgroup, info = data, members = data1)
 
-@app.route('/invite_member', methods=['GET','POST'])
-def invite_member():
-    user = session['email']
-    session['owner'] = user
-    member = request.form['member']
-    name = session['friendgroup']
-    cursor = conn.cursor();
-    query = 'SELECT * FROM belong WHERE owner_email = %s AND fg_name = %s AND email = %s'
-    cursor.execute(query, (user, name, member))
-    #stores the results in a variable
-    data = cursor.fetchone()
-    #use fetchall() if you are expecting more than 1 data row
-    query = 'SELECT * FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
-    cursor.execute(query, (user, name))
-    #stores the results in a variable
-    data1 = cursor.fetchone()
-    query = 'SELECT * FROM person WHERE email = %s'
-    cursor.execute(query, (member))
-    #stores the results in a variable
-    data2 = cursor.fetchone()
-    error = None
-    if(data):
-        #If the previous query returns data, then tag exists
-        error = "This member is already in the group"
-    elif not (data1):
-        error = "This group does not exist"
-    elif not (data2):
-        error = "This member does not exist"
-    else:
-        ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
-        cursor.execute(ins, (member, user, name))
-        conn.commit()
-        cursor.close()
-    return redirect(url_for('friendgroup'))
-
 @app.route('/tag_ad', methods=['GET','POST'])
 def tag_ad():
     item = request.form['item']
@@ -449,6 +414,50 @@ def member_ad():
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))
+
+@app.route('/invite_member', methods=['GET','POST'])
+def invite_member():
+    user = session['email']
+    session['owner'] = user
+    fname = request.form['fmember']
+    lname  = request.form['lmember']
+    group = session['friendgroup']
+    cursor = conn.cursor();
+    query = 'SELECT * FROM belong NATURAL JOIN person WHERE owner_email = %s AND fg_name = %s AND fname = %s AND lname = %s'
+    cursor.execute(query, (user, group, fname, lname))
+    #stores the results in a variable
+    data = cursor.fetchall()
+    #use fetchall() if you are expecting more than 1 data row
+    query = 'SELECT * FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(query, (user, group))
+    #stores the results in a variable
+    data1 = cursor.fetchall()
+    query = 'SELECT * FROM person WHERE fname = %s AND lname = %s'
+    cursor.execute(query, (fname, lname))
+    #stores the results in a variable
+    data2 = cursor.fetchall()
+    error = None
+    if not (data1):
+        error = "This group does not exist"
+    elif not (data2):
+        error = "This member does not exist"
+    else:
+        for name in data2:
+            if len(data) == 0:
+                ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
+                cursor.execute(ins, (name["email"], user, group))
+            else:
+                lst = []
+                for invited in data:
+                    lst.append(invited["email"])
+                if name['email'] not in lst:
+                    ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
+                    cursor.execute(ins, (name["email"], user, group))
+                    conn.commit()
+                else:
+                    error = name['fname'] + " " + name['lname'] + "(" + name['email'] + ") is already invited or a member"
+        cursor.close()
+    return redirect(url_for('friendgroup'))
 
 @app.route('/logout')
 def logout():
