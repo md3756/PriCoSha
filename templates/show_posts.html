@@ -76,6 +76,14 @@ Basic Info:
 	</tr>
 	{% endfor %}
 </table>
+<br>
+
+<form action="/edit_post" method="POST">
+    Item Name: <input type="text" name="item_name" placeholder="Item Name" />
+    File Path: <input type="text" name="file_path" placeholder="File Path" />
+    </br>
+    <input type="submit" value = "Edit Post" />
+</form>
 
 Comment:
 <br>
@@ -99,6 +107,7 @@ Comment:
     <input type="submit" value = "Add a friendTag" />
 </form>
 
+{% if group1 %}
 <form action="/tag_group" method="POST">
     {% for line in groups %}
     {{line.fg_name}} with owner({{line.owner_email}}):<input type = "radio" name = "FriendGroupTag" value="{{line.fg_name}}"><input type = "hidden" name = "FriendGroupOwner" value = "{{line.owner_email}}"></input></input>
@@ -115,16 +124,10 @@ Comment:
   <br>
   <input type="submit" value = "Share Post">
 </form>
-
-<form action="/edit_post" method="POST">
-    Item Name: <input type="text" name="item_name" placeholder="Item Name" />
-    File Path: <input type="text" name="file_path" placeholder="File Path" />
-    </br>
-    <input type="submit" value = "Edit Post" />
-</form>
-
-
 <br>
+{% endif %}
+
+
 Comments:
 <table>
     <table>
@@ -169,7 +172,9 @@ Friends Tagged in Picture:
 {% endfor %}
 </table>
 
-
+<br>
+<br>
+<br>
 <a href="/home">Return to home</a>
 <br>
 <br>
