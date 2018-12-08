@@ -529,6 +529,7 @@ def tag_group():
 
     error = None
     if not (data):
+        #!
         error = "This post is not visible to this group or post is public"
     else:
         exists = False
@@ -554,6 +555,7 @@ def tag_group():
                 conn.commit()
             exists = False
         cursor.close()
+
     return homeError(error)
 
 #FriendGroup page
@@ -566,20 +568,25 @@ def friendgroup():
 def friendgroupError(error):
     user = session['email']
     cursor = conn.cursor();
+
+    #Get group name and description of groups that user own
     ins = 'SELECT friendgroup.fg_name, friendgroup.description ' \
             'FROM friendgroup WHERE owner_email = %s'
     cursor.execute(ins, (user))
     data = cursor.fetchall()
+
     ins = 'SELECT DISTINCT friendgroup.owner_email, friendgroup.fg_name, ' \
             'friendgroup.description FROM belong JOIN friendgroup USING ' \
             '(owner_email) WHERE email = %s AND owner_email <> %s'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
+    
     ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN ' \
             'person USING (email) WHERE email = %s AND ' \
             'status = "FALSE" GROUP BY fg_name,owner_email'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
+    
     if error != None:
         return render_template('friendgroup.html', group = data, group1 = data1, members = data2, error = error)
     else:
