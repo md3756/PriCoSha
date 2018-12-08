@@ -431,11 +431,18 @@ def share_post():
             'owner_email = %s AND fg_name = %s'
     cursor.execute(query, (item, owner, group))
     data = cursor.fetchone()
+    #To check if the specified friendgroup exists
+    query = 'SELECT * FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
+    cursor.execute(query, (owner, group))
+    data1 = cursor.fetchall()
 
     error = None
     if(data):
         #Error: The post was already shared with the group
         error = "This post was already shared to this group"
+    if not (data1):
+        #if no data is returned, then group does not exists
+        error = "This group does not exist"
     else:
         #Share post with the group
         ins = 'INSERT INTO share VALUES(%s, %s, %s)'
@@ -669,7 +676,7 @@ def show_belonggroup():
     return render_template('show_belonggroup.html',
             name = friendgroup, info = data, members = data1)
 
-#Accept and decline pending tag requests
+#Accept and decline pending tag requests for user
 @app.route('/tag_ad', methods=['GET','POST'])
 def tag_ad():
     item = request.form['item']
@@ -691,6 +698,7 @@ def tag_ad():
     cursor.close()
     return redirect(url_for('home'))
 
+#Accept and decline a friendgroup invite for user
 @app.route('/member_ad', methods=['GET','POST'])
 def member_ad():
     user = session['email']
@@ -699,10 +707,12 @@ def member_ad():
     tag = int(request.form['tag'])
     cursor = conn.cursor();
     if(tag == 1) :
+        #Sets the status attribute in belong to True to show the invite was approved
         ins = 'UPDATE belong SET status = "TRUE" WHERE email = %s ' \
                 'AND owner_email = %s AND fg_name = %s'
         cursor.execute(ins, (user, owner, name))
     else:
+        #Deletes the invite request from the belong table since the invite was declined
         ins = 'DELETE FROM belong WHERE email = %s AND ' \
             'owner_email = %s AND fg_name = %s AND status = "FALSE"'
         cursor.execute(ins, (user, owner, name))
@@ -710,6 +720,7 @@ def member_ad():
     cursor.close()
     return redirect(url_for('friendgroup'))
 
+#Invites members to the specified friendgroup
 @app.route('/invite_member', methods=['GET','POST'])
 def invite_member():
     user = session['email']
@@ -718,51 +729,59 @@ def invite_member():
     lname  = request.form['lmember']
     group = session['friendgroup']
     cursor = conn.cursor();
+    #To check all the people belonging to a specified friendgroup
     query = 'SELECT * FROM belong NATURAL JOIN person WHERE ' \
             'owner_email = %s AND fg_name = %s AND fname = %s AND lname = %s'
     cursor.execute(query, (user, group, fname, lname))
-    #stores the results in a variable
     data = cursor.fetchall()
-    #use fetchall() if you are expecting more than 1 data row
+    #To check if the specified friendgroup exists
     query = 'SELECT * FROM friendgroup WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(query, (user, group))
-    #stores the results in a variable
     data1 = cursor.fetchall()
+    #To check if a person exists
     query = 'SELECT * FROM person WHERE fname = %s AND lname = %s'
     cursor.execute(query, (fname, lname))
-    #stores the results in a variable
     data2 = cursor.fetchall()
+
     error = None
     lst = []
+    #Adds the people belonging to the specified group to the list lst
     for invited in data:
         lst.append(invited["email"])
     if not (data1):
+        #if no data is returned, then group does not exists
         error = "This group does not exist"
     elif not (data2):
+        #if no data is returned, then person does not exists
         error = "This person does not exist"
     else:
         for name in data2:
+            #if there is no one with the specified name that has been invited to the group, add the member
             if len(data) == 0:
                 ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
                 cursor.execute(ins, (name["email"], user, group))
             else:
+                #Otherwise, there are people with the name that have been invited, but it could be the same person or different person with the same name
                 if name['email'] not in lst:
                     error = None
                     ins = 'INSERT INTO belong VALUES(%s, %s, %s, "FALSE")'
                     cursor.execute(ins, (name["email"], user, group))
                     conn.commit()
                 else:
+                    #Shows error if the person with the specified name
                     error = name['fname'] + " " + name['lname'] + "(" + name['email'] + ") is already invited or a member"
         cursor.close()
     return friendgroupError(error)
 
+#Logs out of session of the user
 @app.route('/logout')
 def logout():
     session.pop('email')
     return redirect('/')
 
+#Session key
 app.secret_key = 'some key that you will never guess'
 
-
+#Runs program
 if __name__ == "__main__":
     app.run('127.0.0.1', 5000, debug=True)

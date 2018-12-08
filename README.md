@@ -22,11 +22,11 @@ PriCoSha is a system of privately sharing content items among groups of people. 
 
 ##### Post a content item
 
-  User enters relevant data such as the post name and file_path as well as designates whether the content item is public or private. The post is automatically assigned a unique item_id and
+  User enters relevant data such as the post name and file_path as well as designates whether the content item is public or private. The post is automatically assigned a unique item_id and post_time is set to now. The post can be shared in the page where the post details are shown and only the owner of the post can share the post.
 
 ##### Tag a content item
 
-  Users are able to select content items visible to them and tag to another user with their email
+  Users are able to select content items visible to them and tag to another user with their email in the page where the post details are shown.
 
 ##### Add friend
 
@@ -75,3 +75,6 @@ Daisy: Group Invite, Add friend, Error displaying
 Hannah: Editing post, Tagging a Group, Manage tags
 
 Lyanne: Show public content, top rated posts, Showing shared content
+
+
+###**Shows errors at the top of the main pages (home.html, friendgroup.html)
