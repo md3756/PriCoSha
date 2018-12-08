@@ -29,6 +29,17 @@
 		display: inline-block;
 		width: 200px;
 	}
+    input[type="submit"] {
+        background-color: #75a7f9;
+        border: solid;
+        color: white;
+        text-align: center;
+        display: inline-block;
+        font-size: 12px;
+        margin: 1px 1px;
+        cursor: pointer;
+        border-radius: 25px;
+    }
 	</style>
 </head>
 <body>
@@ -73,17 +84,29 @@ Comment:
     <br>
     <input type="submit" name="the_comment" value = "Add a comment" />
 </form>
-<br>
 
 <form action="/rate" method = "POST">
     Rate:
     😍<input type="radio" name="emoji" value="1" />
     😂<input type = "radio" name="emoji" value="2" />
     👍<input type="radio" name="emoji" value="3" />
+    <br>
     <input type="submit" value=rate />
 </form>
 
-<br>
+<form action="/tag" method="POST">
+    <input type="text" name="friendTag" placeholder="Tagged" /> </br>
+    <input type="submit" value = "Add a friendTag" />
+</form>
+
+<form action="/tag_group" method="POST">
+    {% for line in groups %}
+    {{line.fg_name}} with owner({{line.owner_email}}):<input type = "radio" name = "FriendGroupTag" value="{{line.fg_name}}"><input type = "hidden" name = "FriendGroupOwner" value = "{{line.owner_email}}"></input></input>
+    <br>
+    {% endfor %}
+    <input type="submit" value = "Add a friendGroupTag" />
+</form>
+
 Comments:
 <table>
     <table>
@@ -128,25 +151,6 @@ Friends Tagged in Picture:
 {% endfor %}
 </table>
 
-<br>
-<form action="/tag" method="POST">
-	<input type="text" name="friendTag" placeholder="Tagged" /> </br>
-	<input type="submit" value = "Add a friendTag" />
-</form>
-<br>
-
-
-<br>
-<form action="/tag_group" method="POST">
-	{% for line in groups %}
-	{{line.fg_name}} with owner({{line.owner_email}}):<input type = "radio" name = "FriendGroupTag" value="{{line.fg_name}}"><input type = "hidden" name = "FriendGroupOwner" value = "{{line.owner_email}}"></input></input>
-	<br>
-	{% endfor %}
-	<input type="submit" value = "Add a friendGroupTag" />
-</form>
-<br>
-
-<br>
 <br>
 <a href="/home">Return to home</a>
 <br>
