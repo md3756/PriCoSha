@@ -580,8 +580,8 @@ def friendgroupError(error):
     data = cursor.fetchall()
     #Gets the group owner and name of the groups that user belongs to
     ins = 'SELECT DISTINCT friendgroup.owner_email, friendgroup.fg_name, ' \
-            'friendgroup.description FROM belong JOIN friendgroup USING ' \
-            '(owner_email) WHERE email = %s AND owner_email <> %s AND status = "TRUE"'
+            'friendgroup.description FROM belong NATURAL JOIN friendgroup ' \
+            'WHERE email = %s AND owner_email <> %s AND status = "TRUE"'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
     #Gets the pending group invites for the user
@@ -669,17 +669,21 @@ def show_belonggroup():
     return render_template('show_belonggroup.html',
             name = friendgroup, info = data, members = data1)
 
+#Accept and decline pending tag requests
 @app.route('/tag_ad', methods=['GET','POST'])
 def tag_ad():
     item = request.form['item']
     tag = int(request.form['tag'])
     user = session['email']
     cursor = conn.cursor();
+    #tag == 1 indicates that the tag was accepted
     if(tag == 1) :
+        #Sets the status attribute in tag to True to show the tag was approved
         ins = 'UPDATE tag SET status = "TRUE" WHERE ' \
             'item_id = %s AND email_tagged = %s'
         cursor.execute(ins, (item, user))
     else:
+        #Deletes the tag from the tag table since the tag was declined
         ins = 'DELETE FROM tag WHERE item_id = %s AND ' \
             'email_tagged = %s AND status = "FALSE"'
         cursor.execute(ins, (item, user))
