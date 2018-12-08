@@ -31,6 +31,7 @@ def index():
     cursor.execute(query)
     data = cursor.fetchall()
     cursor.close()
+    #render the template of the specified html page
     return render_template('index.html', posts=data)
 
 #Renders login html file
@@ -79,7 +80,7 @@ def registerAuth():
     lname = request.form['lname']
     cursor = conn.cursor()
 
-    #Gets all data of the user 
+    #Gets all data of the user
     query = 'SELECT * FROM person WHERE email = %s'
     cursor.execute(query, (username))
     data = cursor.fetchone()
@@ -137,7 +138,7 @@ def homeError(error):
         #Render home page if there's no error
         return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2, error = error)
     else:
-        #Render home page with error message if there's an error
+        #Render page with error message if there's an error
         return render_template('home.html', username=user, posts=data, posts_user = data1, name=name, tags = data2)
 
 
@@ -150,27 +151,27 @@ def post():
     is_pub = int(request.form['public'])
     file_path = request.form['file_path']
     cursor = conn.cursor();
-    
+
     if(is_pub == 1 and file_path):
         #Insert public post with file path
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, TRUE)'
         cursor.execute(ins, (user, file_path, post))
-    
+
     elif(is_pub == 0 and file_path):
         #Insert private post with file path
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), %s, %s, FALSE)'
         cursor.execute(ins, (user, file_path, post))
-    
+
     elif(is_pub == 1):
         #Insert public post with no file path
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, TRUE)'
         cursor.execute(ins, (user, post))
-    
+
     else:
         #Insert private post with no file path
         ins = 'INSERT INTO contentitem VALUES(NULL, %s, NOW(), NULL, %s, FALSE)'
         cursor.execute(ins, (user, post))
-    
+
     conn.commit()
     cursor.close()
     return homeError(None)
@@ -189,7 +190,7 @@ def comment():
     ins = 'SELECT * FROM comments WHERE item_id = %s AND email = %s'
     cursor.execute(ins, (item, user))
     data1 = cursor.fetchall()
-    
+
     error = None
     if (data1):
         #Error: A comment is already made on the post
@@ -214,7 +215,7 @@ def rate():
 
     #Get all rating data of user's post
     ins = 'SELECT * FROM rate WHERE item_id = %s AND email = %s'
-    cursor.execute(ins, (item, email))
+    cursor.execute(ins, (item, user))
     data1 = cursor.fetchall()
 
     error = None
@@ -225,16 +226,16 @@ def rate():
         if (emoji == 1):
             #Add heart-eyed emoji for the user's rating
             ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "😍")'
-        
-        elif (emoji == 2):    
+
+        elif (emoji == 2):
             #Add crying-laugh emoji for the user's rating
             ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "😂")'
-        
+
         elif (emoji == 3):
             #Add thumbs up emoji for the user's rating
             ins = 'INSERT INTO rate VALUES(%s, %s, NOW(), "👍")'
 
-        cursor.execute(ins, (email, item))
+        cursor.execute(ins, (user, item))
         conn.commit()
         cursor.close()
 
@@ -254,13 +255,13 @@ def shared():
     cursor.execute(query, (user, user))
     data = cursor.fetchall()
 
-    #Get all data of posts that are rated more than five times and are shared with user 
+    #Get all data of posts that are rated more than five times and are shared with user
     query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
             'contentitem NATURAL JOIN (SELECT item_id, COUNT(emoji) AS emo_count FROM rate NATURAL JOIN ' \
             'contentitem GROUP BY item_id HAVING emo_count > 5) AS top_rated WHERE email = %s AND belong.status = "TRUE"'
     cursor.execute(query, (user))
     data2 = cursor.fetchall()
-    
+
     cursor.close()
     return render_template('shared_posts.html', posts=data, emoji1=data2)
 
@@ -278,7 +279,7 @@ def show_posts():
     cursor.execute(ins, (item))
     data = cursor.fetchall()
 
-    #Get first name, last name, and email of user for accepted tags 
+    #Get first name, last name, and email of user for accepted tags
     ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
             'tag.email_tagged = person.email WHERE item_id = %s ' \
             'AND status = "TRUE"'
@@ -322,14 +323,14 @@ def show_visibleposts():
     cursor.execute(ins, (item))
     data = cursor.fetchall()
 
-    #Get first name, last name, and email of person for accepted tags 
+    #Get first name, last name, and email of person for accepted tags
     ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
             'tag.email_tagged = person.email ' \
             'WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
     data1 = cursor.fetchall()
 
-    #!
+    #Selects the groups that the owner of the post and the user share/ are both a member of
     ins = 'SELECT DISTINCT fg_name, owner_email FROM belong AS b WHERE ' \
             'email = %s AND status = "TRUE" AND (fg_name, owner_email) in ' \
             '(SELECT fg_name, owner_email FROM belong WHERE email = %s ' \
@@ -363,12 +364,12 @@ def show_publicposts():
     session['poster'] = poster
     cursor = conn.cursor()
 
-    #Get all data of post with item_id 
+    #Get all data of post with item_id
     ins = 'SELECT * FROM contentitem WHERE item_id = %s'
     cursor.execute(ins, (item))
     data = cursor.fetchall()
 
-    #Get first name, last name, and email of person for accepted tags 
+    #Get first name, last name, and email of person for accepted tags
     ins = 'SELECT fname, lname, person.email FROM tag JOIN person ON ' \
         'tag.email_tagged = person.email WHERE item_id = %s AND status = "TRUE"'
     cursor.execute(ins, (item))
@@ -388,7 +389,7 @@ def show_publicposts():
     return render_template('show_publicposts.html', post = data, tags = data1,
             comments = data2, ratings = data3)
 
-
+#Edits the user's post if given inputs
 @app.route('/edit_post', methods=['GET','POST'])
 def edit_post():
     item = session['item_id']
@@ -417,6 +418,7 @@ def edit_post():
     cursor.close()
     return redirect(url_for('home'))
 
+#Share the post of the user to the groups that it belongs to
 @app.route('/share_post', methods=['GET','POST'])
 def share_post():
     item = session['item_id']
@@ -432,7 +434,7 @@ def share_post():
 
     error = None
     if(data):
-        #Error: The post was already shared with the group 
+        #Error: The post was already shared with the group
         error = "This post was already shared to this group"
     else:
         #Share post with the group
@@ -443,20 +445,20 @@ def share_post():
 
     return homeError(error)
 
-
+#Tags individual people in a post if the post is visible to the to-be tagged person
 @app.route('/tag', methods=['GET','POST'])
 def tag():
     user = session['email']
     tagged = request.form['friendTag']
     item = session['item_id']
     cursor = conn.cursor()
-    
+
     #Get all data for person-tagged's tag on the post with item_id
     query = 'SELECT * FROM tag WHERE email_tagged = %s AND item_id = %s'
     cursor.execute(query, (tagged, item))
     data = cursor.fetchone()
 
-    #!
+    #Checks if the post with specified item_id was shared to the person being tagged
     query = 'SELECT * FROM belong NATURAL JOIN share NATURAL JOIN ' \
             'contentitem WHERE item_id = %s AND email = %s AND belong.status = "TRUE"'
     cursor.execute(query, (item, tagged))
@@ -467,7 +469,7 @@ def tag():
     cursor.execute(query, (item))
     data2 = cursor.fetchone()
 
-    #Get all data for existing users
+    #Get all data for tagged user, check if the tagged person exists
     query = 'SELECT * FROM person WHERE email = %s'
     cursor.execute(query, (tagged))
     data3 = cursor.fetchall()
@@ -476,33 +478,33 @@ def tag():
     if not (data3):
         #Error: The person tagged does not exist
         error = "This person that you are trying to tag does not exist"
-    
+
     elif(data):
         #Error: email_tagged is already tagged on the post
         error = "This tag already exists"
-    
+
     else:
-        #Checks if the post is public or visible to the person tagged!
+        #Checks if the post is public or visible to the person tagged
         if(not data2 and not data1):
             #Error: The post is not visible to the person tagged
             error = "This post is not visible to person tagged"
-        
+
         else:
             if (user == tagged):
                 #Automatically accept tag if user is tagging themself
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
-            
+
             else:
                 #Send tag request to person tagged for tag pending
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
-            
+
             cursor.execute(ins, (tagged, user, item))
             conn.commit()
             cursor.close()
 
     return homeError(error)
 
-
+#Tags all the members of a group in the post if the post is visible to the to-be tagged group
 @app.route('/tag_group', methods=['GET','POST'])
 def tag_group():
     user = session['email']
@@ -510,14 +512,14 @@ def tag_group():
     owner = request.form['FriendGroupOwner']
     item = session['item_id']
     cursor = conn.cursor()
-    
-    #Get all data of post that is shared with friend group!
+
+    #To checks if the post is shared with the specified friend group
     query = 'SELECT * FROM share WHERE owner_email = %s ' \
             'AND fg_name = %s AND item_id = %s'
     cursor.execute(query, (owner, taggedGroup, item))
     data = cursor.fetchone()
 
-    #Get email of all members in tagged group
+    #Get email of all members in the specified group
     query = 'SELECT email FROM belong WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(query, (owner, taggedGroup))
     data1 = cursor.fetchall()
@@ -529,9 +531,10 @@ def tag_group():
 
     error = None
     if not (data):
-        #!
+        #If nothing is returned, then the post is not visible or shared with group since it is public
         error = "This post is not visible to this group or post is public"
     else:
+        #variable to check if person already tagged
         exists = False
         #Loop through email of all members in tagged group
         for line in data1:
@@ -541,9 +544,9 @@ def tag_group():
                     #Error: The person is already tagged or have a tag pending for this post
                     error = "This person is already tagged or pending a tag"
                     exists = True
-             
+
             if (user == line['email'] and not exists):
-                #The user in the group is not yet tagged on the post      
+                #The user in the group is not yet tagged on the post
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "TRUE", NOW())'
                 cursor.execute(ins, (line['email'], user, item))
                 conn.commit()
@@ -553,6 +556,7 @@ def tag_group():
                 ins = 'INSERT INTO tag VALUES(%s, %s, %s, "FALSE", NOW())'
                 cursor.execute(ins, (line['email'], user, item))
                 conn.commit()
+            #Reset exist variable for next memmber to the group to be tagged
             exists = False
         cursor.close()
 
@@ -574,19 +578,20 @@ def friendgroupError(error):
             'FROM friendgroup WHERE owner_email = %s'
     cursor.execute(ins, (user))
     data = cursor.fetchall()
-
+    #Gets the group owner and name of the groups that user belongs to
     ins = 'SELECT DISTINCT friendgroup.owner_email, friendgroup.fg_name, ' \
             'friendgroup.description FROM belong JOIN friendgroup USING ' \
-            '(owner_email) WHERE email = %s AND owner_email <> %s'
+            '(owner_email) WHERE email = %s AND owner_email <> %s AND status = "TRUE"'
     cursor.execute(ins, (user, user))
     data1 = cursor.fetchall()
-    
+    #Gets the pending group invites for the user
     ins = 'SELECT belong.owner_email, belong.fg_name FROM belong JOIN ' \
             'person USING (email) WHERE email = %s AND ' \
             'status = "FALSE" GROUP BY fg_name,owner_email'
     cursor.execute(ins, (user))
     data2 = cursor.fetchall()
-    
+    cursor.close()
+
     if error != None:
         return render_template('friendgroup.html', group = data, group1 = data1, members = data2, error = error)
     else:
@@ -598,6 +603,7 @@ def create_friendgroup():
     description = request.form['description']
     name = request.form['name']
     cursor = conn.cursor();
+    #To check if the friendgroup with the specified name and owner
     query = 'SELECT * FROM friendgroup WHERE owner_email = %s ' \
             'AND fg_name = %s'
     cursor.execute(query, (user, name))
@@ -609,26 +615,30 @@ def create_friendgroup():
         #If the query returns data, then group exists
         error = "This group already exists"
     else:
+        #Insert friendgroup values if friendgroup can be created
         ins = 'INSERT INTO friendgroup VALUES(%s, %s, %s)'
         cursor.execute(ins, (user, name, description))
         conn.commit()
+        #Insert the owner in belong table to show that they belong to the group
         ins = 'INSERT INTO belong VALUES(%s, %s, %s, "TRUE")'
         cursor.execute(ins, (user, user, name))
         conn.commit()
         cursor.close()
     return friendgroupError(error)
 
+#Shows the details of the friendgroup that the user owns such as the members and description
 @app.route('/show_group', methods=['GET','POST'])
 def show_group():
     friendgroup = request.form['group']
     session['friendgroup'] = friendgroup
     user = session['email']
     cursor = conn.cursor();
+    #Gets the description of the specified friendgroup owner and name
     ins = 'SELECT description FROM friendgroup WHERE ' \
             'owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (user, friendgroup))
     data = cursor.fetchone()
-    #double check query!
+    #Gets the first name, last name and emails of the members of the specified friendgroup
     ins = 'SELECT fname, lname, person.email FROM belong NATURAL JOIN ' \
         'person WHERE owner_email = %s AND fg_name = %s AND status = "TRUE"'
     cursor.execute(ins, (user, friendgroup))
@@ -637,16 +647,19 @@ def show_group():
     return render_template('show_group.html', name = friendgroup,
             info = data, members = data1)
 
+#Show the details of the group that the
 @app.route('/show_belonggroup', methods=['GET','POST'])
 def show_belonggroup():
     friendgroup = request.form['group']
     session['friendgroup'] = friendgroup
     owner = request.form['owner']
     cursor = conn.cursor();
+    #Gets the owner email and description from the groups that user belongs to
     ins = 'SELECT owner_email, description FROM friendgroup ' \
             'WHERE owner_email = %s AND fg_name = %s'
     cursor.execute(ins, (owner, friendgroup))
     data = cursor.fetchone()
+    #Gets the first name, last name and emails of the members of the group that the users belong to
     ins = 'SELECT fname, lname, person.email FROM belong ' \
             'NATURAL JOIN person WHERE owner_email = %s ' \
             'AND fg_name = %s AND status = "TRUE"'
