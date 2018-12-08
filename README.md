@@ -77,4 +77,4 @@ Hannah: Editing post, Tagging a Group, Manage tags
 Lyanne: Show public content, top rated posts, Showing shared content
 
 
-###**Shows errors at the top of the main pages (home.html, friendgroup.html)
+### **Shows errors at the top of the main pages (home.html, friendgroup.html)**
